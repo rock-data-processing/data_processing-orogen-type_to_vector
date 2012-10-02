@@ -30,6 +30,11 @@ namespace abstract_processing_component {
     class Task : public TaskBase
     {
 	friend class TaskBase;
+	
+	private:
+	    /* Concatenation of every port payload */
+	    Eigen::VectorXd payload_vector;
+	
     protected:
 
         /* Handler for the createPort operation
