@@ -5,6 +5,12 @@
 
 #include "abstract_processing_component/TaskBase.hpp"
 
+namespace RTT {
+    namespace base {
+        class InputPortInterface;
+    }
+}
+
 namespace abstract_processing_component {
 
     /*! \class Task 
@@ -85,7 +91,7 @@ namespace abstract_processing_component {
          * component is stopped and recover() needs to be called before starting
          * it again. Finally, FatalError cannot be recovered.
          */
-        // void updateHook();
+        void updateHook();
 
         /** This hook is called by Orocos when the component is in the
          * RunTimeError state, at each activity step. See the discussion in

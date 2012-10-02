@@ -2,6 +2,12 @@
 
 #include "Task.hpp"
 
+using RTT::types::TypeInfo;
+using RTT::log;
+using RTT::endlog;
+using RTT::Error;
+using RTT::Info;
+
 using namespace abstract_processing_component;
 
 Task::Task(std::string const& name, TaskCore::TaskState initial_state)
@@ -20,7 +26,35 @@ Task::~Task()
 
 bool Task::createPort(::std::string const & port_name, ::std::string const & type_name)
 {
-    return bool();
+    /* Check if port already exists (check name) */
+    RTT::base::PortInterface *pi = ports()->getPort(port_name);
+    if(pi)
+    {
+        // Port exists. Returns success.
+        log(Info) << "Port " << port_name << " is already registered." << endlog();
+        return true;
+    }
+
+    /* Check if port type is known */
+    RTT::types::TypeInfoRepository::shared_ptr ti = RTT::types::TypeInfoRepository::Instance();
+    RTT::types::TypeInfo* type = ti->type(type_name);
+    if (!type)
+    {
+    	log(Error) << "Cannot find port type " << type_name << " in the type info repository." << endlog();
+	    return false;
+    }
+    
+    /* Add input port */
+    RTT::base::InputPortInterface *in_port = type->inputPort(port_name);
+    if (!in_port)
+    {
+        log(Error) << "An error occurred during input port generation." << endlog();
+        return false;
+    }
+    ports()->addPort(in_port->getName(), *in_port);
+    log(Info) << "Added port " << port_name << " to task." << endlog();
+    
+    return true;
 }
 
 /// The following lines are template definitions for the various state machine
@@ -39,10 +73,12 @@ bool Task::createPort(::std::string const & port_name, ::std::string const & typ
 //         return false;
 //     return true;
 // }
-// void Task::updateHook()
-// {
-//     TaskBase::updateHook();
-// }
+void Task::updateHook()
+{
+    TaskBase::updateHook();
+    
+    
+}
 // void Task::errorHook()
 // {
 //     TaskBase::errorHook();
