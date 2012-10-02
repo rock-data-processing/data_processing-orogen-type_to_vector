@@ -1,0 +1,17 @@
+<package>
+  <description brief="Abstract task allowing dynamic adding of input ports. These ports' payload information is being merged into a vector. This representation of data is practical for machine learning algorithms.">
+  
+  </description>
+  <author>Allan E. Conquest/allan.conquest@dfki.de</author>
+  <license></license>
+  <url>http://</url>
+  <logo>http://</logo>
+  <!--
+   To add any dependencies use the depend tag
+  <depend package="dummy-dependency-0" />
+	...
+  <depend package="dummy-dependency-n-1" />
+  <depend package="dummy-dependency-n" />
+  -->
+  <depend package="base/types" />
+</package>
