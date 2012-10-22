@@ -2,9 +2,11 @@ require 'orocos'
 include Orocos
 Orocos.initialize
 
-Orocos.run 'abstract_processing_component_test' do |p|
-    task = TaskContext.get 'abstract_processing_component'
+Orocos.run 'general_processing' do |p|
+    task = TaskContext.get 'general_processing'
     task.callop("createPort", "myport", "/base/samples/RigidBodyState")
+    
+    task.start
     
     while true
     end

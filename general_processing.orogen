@@ -10,6 +10,8 @@ name "general_processing"
 # projects, these projects should be imported there as well.
 # import_types_from "base"
 
+using_library 'general_processing'
+
 # Declare a new task context (i.e., a component)
 #
 # The corresponding C++ class can be edited in tasks/Task.hpp and
@@ -52,12 +54,12 @@ end
 
 
 # Declares a deployment, i.e. an actual executable that contains various tasks.
-deployment "abstract_processing_component_test" do
+deployment "general_processing_test" do
     # This is a test deployment that should not be installed
     do_not_install
 
     # Declares it as periodic, with a period of 100ms
-    task("abstract_processing_component", "Task").
+    task("general_processing", "Task").
         periodic(0.1)
 end
 

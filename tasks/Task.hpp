@@ -4,6 +4,7 @@
 #define GENERAL_PROCESSING_TASK_TASK_HPP
 
 #include "general_processing/TaskBase.hpp"
+#include <map>
 
 namespace RTT {
     namespace base {
@@ -34,12 +35,14 @@ namespace general_processing {
 	private:
 	    /* Concatenation of every port payload */
 	    Eigen::VectorXd payload_vector;
+	    
+	    std::map<const std::string, struct VectorValueInfo &> port_info;
 	
     protected:
 
         /* Handler for the createPort operation
          */
-        virtual bool createPort(::std::string const & port_name, ::std::string const & type_name);
+        virtual bool createPort(const ::std::string & port_name, const ::std::string & type_name, const ::std::string & container_slice = "", int vector_id = 0);
 
     public:
         /** TaskContext constructor for Task
