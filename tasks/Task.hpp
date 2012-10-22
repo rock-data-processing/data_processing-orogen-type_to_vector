@@ -1,9 +1,9 @@
 /* Generated from orogen/lib/orogen/templates/tasks/Task.hpp */
 
-#ifndef ABSTRACT_PROCESSING_COMPONENT_TASK_TASK_HPP
-#define ABSTRACT_PROCESSING_COMPONENT_TASK_TASK_HPP
+#ifndef GENERAL_PROCESSING_TASK_TASK_HPP
+#define GENERAL_PROCESSING_TASK_TASK_HPP
 
-#include "abstract_processing_component/TaskBase.hpp"
+#include "general_processing/TaskBase.hpp"
 
 namespace RTT {
     namespace base {
@@ -11,7 +11,7 @@ namespace RTT {
     }
 }
 
-namespace abstract_processing_component {
+namespace general_processing {
 
     /*! \class Task 
      * \brief The task context provides and requires services. It uses an ExecutionEngine to perform its functions.
@@ -46,7 +46,7 @@ namespace abstract_processing_component {
          * \param name Name of the task. This name needs to be unique to make it identifiable via nameservices.
          * \param initial_state The initial TaskState of the TaskContext. Default is Stopped state.
          */
-        Task(std::string const& name = "abstract_processing_component::Task", TaskCore::TaskState initial_state = Stopped);
+        Task(std::string const& name = "general_processing::Task", TaskCore::TaskState initial_state = Stopped);
 
         /** TaskContext constructor for Task 
          * \param name Name of the task. This name needs to be unique to make it identifiable for nameservices. 

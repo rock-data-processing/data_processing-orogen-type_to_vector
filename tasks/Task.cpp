@@ -8,7 +8,7 @@ using RTT::endlog;
 using RTT::Error;
 using RTT::Info;
 
-using namespace abstract_processing_component;
+using namespace general_processing;
 
 Task::Task(std::string const& name, TaskCore::TaskState initial_state)
     : TaskBase(name, initial_state)
