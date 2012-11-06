@@ -14,5 +14,7 @@
   <depend package="dummy-dependency-n" />
   -->
   <depend package="base/types" />
+  <depend package="orogen" />
+  <depend package="drivers/orogen/aggregator"/>
   <depend package="virgo/general_processing" />
 </package>

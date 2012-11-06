@@ -1,65 +1,56 @@
 name "general_processing"
-# Optionally declare the version number
-# version "0.1"
+
+version "0.1"
 
 # If new data types need to be defined, they have to be put in a separate C++
 # header, and this header will be loaded here
-# import_types_from "abstract_processing_componentType.hpp"
+import_types_from "GeneralProcessingTypes.hpp"
 
 # If the component/deployments use data types that are defined in other oroGen
 # projects, these projects should be imported there as well.
 # import_types_from "base"
-
 using_library 'general_processing'
 
-# Declare a new task context (i.e., a component)
-#
-# The corresponding C++ class can be edited in tasks/Task.hpp and
-# tasks/Task.cpp, and will be put in the abstract_processing_component namespace.
-task_context "Task" do
+task_context "BaseTask" do
+    doc "This task provides a infrastructure for processing data types as a "+
+    "vector of their values. Input ports can pe added, that automatically are "+
+    "converted into a vector of doubles. Vectors of multiple ports can be aranged "+
+    "into one big vector."
+
     # Announce possible creation of input ports at runtime. Might be needed by Roby.
-    dynamic_input_port(/\w+\.\w+/, nil).
-    needs_reliable_connection. # TODO necessary?
-    task_trigger               # TODO necessary?
+    dynamic_input_port(/\w+/, nil).
+        needs_reliable_connection. # TODO necessary?
+        task_trigger
 
-   # A configuration property (here, a std::string). Its value can be retrieved
-   # in the C++ code with # _config_value.get() and _config_value.set(new_value).
-   #property "config_value", "/std/string"
+    operation("addComponentToVector").
+       returns("bool").
+       argument("component", "/std/string", "compoment to receive the ports from").
+       argument("slice", "/std/string", "get a part of the data, is applied to all ports").
+       argument("to_vector", "int").
+       doc("add all ports of a component")
+   
+    operation("addPortToVector").
+       returns("bool").
+       argument("component", "/std/string", "compoment to receive the data from").
+       argument("port", "/std/string", "component's port to receive the data from").
+       argument("slice", "/std/string", "get only a part of the data").
+       argument("to_vector","int").
+       doc("add a port of a component")
 
-   # An input port, i.e. an object from which the component gets data from
-   # other components' outputs
-   #
-   # Data can be retrieved using _input.read(value), which returns true if data
-   # was available, and false otherwise. _input.connected() returns if this
-   # input is connected to an output or not.
-   #input_port "input", "/std/string"
-
-   # An output port, i.e. an object to which the component pushes data so that
-   # it is transmitted to other components' inputs
-   #
-   # Data can be written using _output.write(value). _output.connected() returns
-   # if this output is connected to an input or not.
-   #output_port "output", "int"
-
-    operation("createPort").
+    operation("createInputPort").
         returns("bool").
         argument("port_name", "std/string", "the name of the port to be created").
         argument("type_name", "std/string", "the name of the type the port should handle").
-        doc("Creates an input port at runtime.")
+        argument("slice", "std/string", "describes the part of the type to be converted").
+        argument("to_vector", "int", "index of the vector is should be added to").
+        doc("creates an input port at runtime")
 
-   # If you want that component's updateHook() to be executed when the "input"
-   # port gets data, uncomment this
-   # port_driven "input"
+    property("output_toc","bool").
+        doc "outputs the content description of the most recently assembled vector"
+
+    output_port("vector_tocs", "/general_processing/VectorTocInfo"). # own data structure?
+        doc "puts out vector content data if output_toc is true"
+
+    stream_aligner
+
 end
-
-
-# Declares a deployment, i.e. an actual executable that contains various tasks.
-deployment "general_processing_test" do
-    # This is a test deployment that should not be installed
-    do_not_install
-
-    # Declares it as periodic, with a period of 100ms
-    task("general_processing", "Task").
-        periodic(0.1)
-end
-
