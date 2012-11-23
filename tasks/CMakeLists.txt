@@ -2,7 +2,8 @@
 
 include(general_processingTaskLib)
 ADD_LIBRARY(${GENERAL_PROCESSING_TASKLIB_NAME} SHARED 
-    ${GENERAL_PROCESSING_TASKLIB_SOURCES})
+    ${GENERAL_PROCESSING_TASKLIB_SOURCES}
+    VectorDataStorage.cpp)
 
 add_dependencies(${GENERAL_PROCESSING_TASKLIB_NAME}
     regen-typekit)

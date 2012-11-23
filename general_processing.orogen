@@ -2,10 +2,6 @@ name "general_processing"
 
 version "0.1"
 
-# If new data types need to be defined, they have to be put in a separate C++
-# header, and this header will be loaded here
-import_types_from "GeneralProcessingTypes.hpp"
-
 # If the component/deployments use data types that are defined in other oroGen
 # projects, these projects should be imported there as well.
 # import_types_from "base"
@@ -15,18 +11,23 @@ task_context "BaseTask" do
     doc "This task provides a infrastructure for processing data types as a "+
     "vector of their values. Input ports can pe added, that automatically are "+
     "converted into a vector of doubles. Vectors of multiple ports can be aranged "+
-    "into one big vector."
+    "into one big vector. Be aware that in case of opaque types not the type itself "+
+    "is converted by the intermediate type."
+
+    needs_configuration
 
     # Announce possible creation of input ports at runtime. Might be needed by Roby.
     dynamic_input_port(/\w+/, nil).
         needs_reliable_connection. # TODO necessary?
         task_trigger
 
+    dynamic_output_port(/\w+/, nil)
+
     operation("addComponentToVector").
        returns("bool").
        argument("component", "/std/string", "compoment to receive the ports from").
        argument("slice", "/std/string", "get a part of the data, is applied to all ports").
-       argument("to_vector", "int").
+       argument("to_vector", "/int").
        doc("add all ports of a component")
    
     operation("addPortToVector").
@@ -34,23 +35,25 @@ task_context "BaseTask" do
        argument("component", "/std/string", "compoment to receive the data from").
        argument("port", "/std/string", "component's port to receive the data from").
        argument("slice", "/std/string", "get only a part of the data").
-       argument("to_vector","int").
+       argument("to_vector","/int").
        doc("add a port of a component")
 
     operation("createInputPort").
         returns("bool").
-        argument("port_name", "std/string", "the name of the port to be created").
-        argument("type_name", "std/string", "the name of the type the port should handle").
-        argument("slice", "std/string", "describes the part of the type to be converted").
-        argument("to_vector", "int", "index of the vector is should be added to").
-        doc("creates an input port at runtime")
+        argument("port_name", "/std/string", "the name of the port to be created").
+        argument("type_name", "/std/string", "the name of the type the port should handle").
+        argument("slice", "/std/string", "describes the part of the type to be converted").
+        argument("to_vector", "/int", "index of the vector it should be added to").
+        doc("creates an input port at runtime and add it to a vector conversion")
 
-    property("output_toc","bool").
-        doc "outputs the content description of the most recently assembled vector"
+    property("debug_ports","/bool").
+        doc "creates debug ports for each vector: data, time"
 
-    output_port("vector_tocs", "/general_processing/VectorTocInfo"). # own data structure?
-        doc "puts out vector content data if output_toc is true"
+    property("debug_places","/bool").
+        doc "creates a debug port for each vector containing the places"
+    
+    property("time_fields","/std/string","time").
+        doc "space seperated list of valid timestamp fields"
 
     stream_aligner
-
 end
