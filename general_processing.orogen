@@ -55,5 +55,7 @@ task_context "BaseTask" do
     property("time_fields","/std/string","time").
         doc "space seperated list of valid timestamp fields"
 
-    stream_aligner
+    stream_aligner do
+        max_latency 0.1
+    end
 end

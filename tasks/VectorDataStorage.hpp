@@ -17,6 +17,7 @@
 #include <rtt/base/DataSourceBase.hpp>
 
 #include <general_processing/Definitions.hpp>
+#include <general_processing/VectorBuilder.hpp>
 
 namespace orogen_transports {
     class TypelibMarshallerBase;
