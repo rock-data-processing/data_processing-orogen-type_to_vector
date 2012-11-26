@@ -2,9 +2,6 @@ name "general_processing"
 
 version "0.1"
 
-# If the component/deployments use data types that are defined in other oroGen
-# projects, these projects should be imported there as well.
-# import_types_from "base"
 using_library 'general_processing'
 
 task_context "BaseTask" do

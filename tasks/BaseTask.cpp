@@ -104,7 +104,7 @@ bool BaseTask::addDebugOutput(DataVector& vector, int vector_idx) {
     if (_debug_places.get()) {
         std::string idx_str = boost::lexical_cast<std::string>(vector_idx);
         vector.placesVectorOut = createOutputPort("debug_places_"+idx_str, 
-                "/std/vector</std/string>");
+                "/std/string");
         if ( ! vector.placesVectorOut ) return false;
     }
 
@@ -157,12 +157,17 @@ bool BaseTask::addDataInfo(RTT::base::InputPortInterface* reader, int vector_idx
     if ( mVectors.size() <= vector_idx ) mVectors.resize(vector_idx+1);
 
     di.mpVector = &(mVectors.at(vector_idx));
-    if ( di.mpVector->empty() ) 
+
+    if ( !di.mpVector->dataVectorOut &&
+         !di.mpVector->timeVectorOut && 
+         !di.mpVector->placesVectorOut ) { 
+        
         if ( !addDebugOutput(*di.mpVector, vector_idx) ) return false;
+    }
+
     di.mpTargetVector = di.mpVector->addVectorPart(di);
     di.newSample.mpInfo = &di;
     
-
     aggregator::StreamAligner::Stream<general_processing::SampleData>::callback_t cb = 
         boost::bind(&BaseTask::sampleCallback,this,_1,_2);
 
