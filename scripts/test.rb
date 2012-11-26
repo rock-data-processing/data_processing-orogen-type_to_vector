@@ -1,14 +1,33 @@
+require 'readline'
 require 'orocos'
 include Orocos
 Orocos.initialize
 
-Orocos.run 'general_processing' do |p|
-    task = TaskContext.get 'general_processing'
-    task.callop("createPort", "myport", "/base/samples/RigidBodyState")
+ENV['BASE_LOG_LEVEL'] = 'DEBUG'
+ENV['BASE_LOG_FORMAT'] = 'SHORT'
+ENV['ORO_LOGLEVEL'] = '6'
+
+Orocos.run 'general_processing::BaseTask' => 'task' do |p|
+    task = TaskContext.get 'task'
+
+    Readline.readline "Press enter to create RigidBodyState port." do
+    end
+
+    task.createInputPort("rbs1","/base/samples/RigidBodyState","",0)
+    
+    Readline.readline "Press enter to create MotionCommand2d port." do
+    end
+
+    task.createInputPort("mc2d","/base/MotionCommand2D","",0)
+
+    Readline.readline "Press enter to start task." do
+    end
+
+    task.configure
     
     task.start
     
-    while true
+    Readline.readline "Press enter to quit." do
     end
 end
 

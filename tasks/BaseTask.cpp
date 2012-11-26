@@ -18,6 +18,7 @@
 using namespace general_processing;
 using RTT::log;
 using RTT::endlog;
+using RTT::Debug;
 using RTT::Info;
 using RTT::Error;
 
@@ -25,7 +26,7 @@ namespace general_processing {
 class TimeNowConversion : public AbstractConverter {
 
 public:
-    TimeNowConversion() : AbstractConverter(VectorToc()) {}
+    TimeNowConversion(const VectorToc& toc) : AbstractConverter(toc) {}
 
     VectorOfDoubles apply (void* data, bool create_places=false) {
         mVector.clear();
@@ -38,17 +39,18 @@ public:
 }
 
 BaseTask::BaseTask(std::string const& name)
-    : BaseTaskBase(name)
+    : BaseTaskBase(name), mpRegistry(new Typelib::Registry())
 {
 }
 
 BaseTask::BaseTask(std::string const& name, RTT::ExecutionEngine* engine)
-    : BaseTaskBase(name, engine)
+    : BaseTaskBase(name, engine), mpRegistry(new Typelib::Registry())
 {
 }
 
 BaseTask::~BaseTask()
 {
+    delete mpRegistry;
 }
 
 RTT::base::OutputPortInterface* BaseTask::createOutputPort(const std::string& port_name,
@@ -124,6 +126,7 @@ bool BaseTask::addInputPort(DataInfo& di, RTT::base::InputPortInterface* reader)
     }
 
     mpRegistry->merge(transport->getRegistry());
+
     if (! mpRegistry->has(transport->getMarshallingType())) {
         log(Error) << "cannot report ports of type " << type->getTypeName() << 
             " as I can't find a typekit Typelib registry that defines it" << endlog();
@@ -131,7 +134,7 @@ bool BaseTask::addInputPort(DataInfo& di, RTT::base::InputPortInterface* reader)
     }
 
     ports()->addEventPort(reader->getName(), *reader); 
-    
+   
     di.typelibMarshaller = transport;
     di.readPort = reader;
     di.handle = di.typelibMarshaller->createSample();
@@ -142,7 +145,7 @@ bool BaseTask::addInputPort(DataInfo& di, RTT::base::InputPortInterface* reader)
 
 bool BaseTask::addDataInfo(RTT::base::InputPortInterface* reader, int vector_idx,
         const std::string& slice) {
-
+    
     if ( vector_idx < 0 ) return false;
 
     DataInfo di;
@@ -158,13 +161,15 @@ bool BaseTask::addDataInfo(RTT::base::InputPortInterface* reader, int vector_idx
         if ( !addDebugOutput(*di.mpVector, vector_idx) ) return false;
     di.mpTargetVector = di.mpVector->addVectorPart(di);
     di.newSample.mpInfo = &di;
+    
 
     aggregator::StreamAligner::Stream<general_processing::SampleData>::callback_t cb = 
         boost::bind(&BaseTask::sampleCallback,this,_1,_2);
+
     di.streamIndex = _stream_aligner.registerStream<general_processing::SampleData>(cb, 
             0, base::Time());
+
     di.pStreamAligner = &_stream_aligner;
-    mDataInfos.push_back(di);
     
     VectorToc toc = VectorTocMaker().apply(
         *(mpRegistry->get(di.typelibMarshaller->getMarshallingType())) );
@@ -179,19 +184,21 @@ bool BaseTask::addDataInfo(RTT::base::InputPortInterface* reader, int vector_idx
         c_sliced_ptr = ConvertPtr(new FlatConverter(toc_sliced));
     else
         c_sliced_ptr = ConvertPtr(new ConvertToVector(toc_sliced, *mpRegistry));
-
+    
     ConvertPtr c_time_ptr;
     if ( toc_time.empty() )
-        c_time_ptr = ConvertPtr(new TimeNowConversion());
+        c_time_ptr = ConvertPtr(new TimeNowConversion(toc_time));
     else {
         toc_time.resize(1);
         ConvertPtr c_single_ptr(new SingleConverter(toc_time));
         c_time_ptr = ConvertPtr(new MultiplyConverter(c_single_ptr, 1.0e-6));
     }
-
+    
     di.conversions.addConverter(c_sliced_ptr);
     di.conversions.addConverter(c_time_ptr);
-
+    
+    mDataInfos.push_back(di);
+    
     return true;
 }
 
@@ -247,7 +254,7 @@ bool BaseTask::createInputPort(::std::string const & port_name,
         return false;
     }
     
-    /* Add input port */
+    /* Create input port */
     RTT::base::InputPortInterface *in_port = type->inputPort(port_name);
     if (!in_port)
     {
@@ -255,15 +262,9 @@ bool BaseTask::createInputPort(::std::string const & port_name,
         return false;
     }
     
-    std::string assigned_name = in_port->getName();
-    
-    ports()->addPort(in_port->getName(), *in_port);
+    //ports()->addPort(in_port->getName(), *in_port);
 
-    addDataInfo(in_port, to_vector, slice);
-     
-    log(Info) << "Added port " << port_name << " to task." << endlog();
-     
-    return true;
+    return addDataInfo(in_port, to_vector, slice);  
 }
 
 void BaseTask::processingStepCallback() {
