@@ -16,7 +16,6 @@ task_context "BaseTask" do
 
     needs_configuration
 
-    # Announce possible creation of input ports at runtime. Might be needed by Roby.
     dynamic_input_port(/\w+/, nil).
         needs_reliable_connection. # TODO necessary?
         task_trigger
@@ -50,11 +49,11 @@ task_context "BaseTask" do
         argument("to_vector", "/int", "index of the vector it should be added to").
         doc("creates an input port at runtime and add it to a vector conversion")
 
-    property("debug_ports","/bool").
-        doc "creates debug ports for each vector: data, time"
+    property("debug_conversion","/bool").
+        doc "create a debug port for a vector and sends the conversion results to it"
 
-    property("debug_places","/bool").
-        doc "creates a debug port for each vector containing the places"
+    property("create_places","/bool").
+        doc "creates place information during conversion"
     
     property("time_fields","/std/string","time").
         doc "space seperated list of valid timestamp fields"
@@ -62,8 +61,16 @@ task_context "BaseTask" do
     stream_aligner do
         max_latency 0.1
     end
+
 end
 
 typekit do
     export_types "/general_processing/ConvertedVector"
+end
+
+deployment "general_processing_test" do
+    do_not_install
+    task('TestBaseTask','general_processing::BaseTask').
+        periodic(0.1)
+    add_default_logger
 end

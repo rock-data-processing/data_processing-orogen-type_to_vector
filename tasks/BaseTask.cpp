@@ -52,6 +52,7 @@ BaseTask::BaseTask(std::string const& name, RTT::ExecutionEngine* engine)
 
 BaseTask::~BaseTask()
 {
+    clear();
     delete mpRegistry;
 }
 
@@ -100,7 +101,7 @@ RTT::base::OutputPortInterface* BaseTask::createOutputPort(const std::string& po
 
 bool BaseTask::addDebugOutput(DataVector& vector, int vector_idx) {
 
-    if (_debug_ports.get()) {
+    if (_debug_conversion.get()) {
 
         std::string idx_str = boost::lexical_cast<std::string>(vector_idx);
 
@@ -210,6 +211,7 @@ void BaseTask::sampleCallback(base::Time const& timestamp, SampleData const& sam
 
     *(sample.mpInfo->mpTargetVector) = sample;
     sample.mpInfo->mpVector->mUpdated = true;
+    sample.mpInfo->mpVector->wroteDebug = false; 
 }
 
 bool BaseTask::addComponentToVector(::std::string const & component, 
@@ -279,6 +281,27 @@ void BaseTask::getTimeVector(int vector_idx, base::VectorXd& time_vector) {
 void BaseTask::getExpandedTimeVector(int vector_idx, base::VectorXd& time_vector) {
     mVectors.at(vector_idx).getExpandedTimeVector(time_vector);
 }
+    
+
+void BaseTask::clear() {
+
+    DataInfos::iterator it = mDataInfos.begin();
+
+    for ( ; it != mDataInfos.end(); it++) {
+
+        it->typelibMarshaller->deleteHandle(it->handle);
+
+        _stream_aligner.unregisterStream(it->streamIndex);
+
+        ports()->removePort(it->readPort->getName());
+
+        if ( it->mpVector->debugOut )
+            ports()->removePort(it->mpVector->debugOut->getName());
+    }
+
+    mDataInfos.clear();
+    mVectors.clear();
+}
 
 // bool BaseTask::configureHook()
 // {
@@ -300,9 +323,16 @@ void BaseTask::updateHook()
     DataInfos::iterator data_it = mDataInfos.begin();
 
     for ( ; data_it != mDataInfos.begin(); data_it++ )
-        while ( data_it->update(_debug_places.get() ) ); 
+        while ( data_it->update(_create_places.get()) ); 
 
     while ( _stream_aligner.step() ) {
+        
+        if ( _debug_conversion.get() ) {
+            Vectors::iterator vector_it = mVectors.begin();
+            for ( ; vector_it != mVectors.end(); vector_it++ )
+                vector_it->writeDebug();
+        }
+
         processingStepCallback();
     }
 }
@@ -321,18 +351,6 @@ void BaseTask::stopHook()
 void BaseTask::cleanupHook()
 {
     BaseTaskBase::cleanupHook();
-
-    DataInfos::iterator it = mDataInfos.begin();
-    for ( ; it != mDataInfos.end(); it++) {
-        it->typelibMarshaller->deleteHandle(it->handle);
-        _stream_aligner.unregisterStream(it->streamIndex);
-        ports()->removePort(it->readPort->getName());
-        if ( it->mpVector->debugOut )
-            ports()->removePort(it->mpVector->debugOut->getName());
-    }
-
-    mDataInfos.clear();
-    mVectors.clear();
-     
+    clear(); 
 }
 

@@ -54,6 +54,8 @@ namespace general_processing {
         /** Callback function for the StreamAligner. */
         void sampleCallback(base::Time const& timestamp, SampleData const& sample);
 
+        void clear();
+
     protected:
         
         bool loadTypekit(std::string const& name);

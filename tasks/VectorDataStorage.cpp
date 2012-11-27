@@ -115,9 +115,10 @@ ConvertedVector& DataVector::getConvertedVector (ConvertedVector& data ) {
 
 void DataVector::writeDebug() {
 
-    if ( !debugOut) return;
+    if ( !debugOut && wroteDebug ) return;
     
     static ConvertedVector data;
     static_cast<RTT::OutputPort<ConvertedVector>*>(debugOut)->
         write(getConvertedVector(data));
+    wroteDebug = true;
 }

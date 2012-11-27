@@ -13,8 +13,8 @@ Orocos.run 'general_processing::BaseTask' => 'task' do |p|
 
     task = TaskContext.get 'task'
 
-    task.debug_ports = true
-    task.debug_places = true
+    task.debug_conversion = true
+    task.create_places = false
 
     task.createInputPort("rbs1","/base/samples/RigidBodyState","",0)
 
@@ -37,8 +37,22 @@ Orocos.run 'general_processing::BaseTask' => 'task' do |p|
     task.configure
     
     task.start
+
+    sleep(0.2)
+
+    task.stop
+    task.cleanup   
     
-    Readline.readline "Press enter to quit." do
+    puts "after cleanup"
+
+    puts "--- Input ports ---"
+    task.each_input_port do |p|
+        puts "#{p.name}  #{p.type_name}  #{p.orocos_type_name}"
+    end
+    
+    puts "\n--- Output ports ---"
+    task.each_output_port do |p|
+        puts "#{p.name}  #{p.type_name}  #{p.orocos_type_name}"
     end
 end
 

@@ -85,6 +85,9 @@ struct DataVector : public std::vector<SampleData> {
 
     /** Will be set to true by component. Setting it to false must to be done by user.*/
     bool mUpdated;
+
+    /** For the purpose of writing the debug only once. Should not be touched by user. */
+    bool wroteDebug; 
     
     RTT::base::OutputPortInterface* debugOut;
 
@@ -114,12 +117,11 @@ struct DataVector : public std::vector<SampleData> {
      * \returns true if part of the vector is new data*/
     void getPlacesVector (StringVector& places_vector);
 
-
     /** Puts the current available data to the struct data and returns it. */
     ConvertedVector& getConvertedVector (ConvertedVector& data);
 
     /** Write debug data to the port. */
-    void writeDebug(); 
+    void writeDebug();
 };
 
 
