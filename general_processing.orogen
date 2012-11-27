@@ -22,6 +22,10 @@ task_context "BaseTask" do
         task_trigger
 
     dynamic_output_port(/\w+/, nil)
+    
+    operation('loadTypekit').
+        returns('bool').
+        argument('name', 'std/string', 'the name of the typekit that should be loaded')
 
     operation("addComponentToVector").
        returns("bool").

@@ -56,6 +56,8 @@ namespace general_processing {
 
     protected:
         
+        bool loadTypekit(std::string const& name);
+        
         /** Add all ports of a component to a vector.  */
         virtual bool addComponentToVector(::std::string const & component, 
                                           ::std::string const & slice, 

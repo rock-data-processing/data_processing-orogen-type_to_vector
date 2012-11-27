@@ -4,6 +4,7 @@
 #include <rtt/base/InputPortInterface.hpp>
 #include <rtt/DataFlowInterface.hpp>
 #include <rtt/typelib/TypelibMarshallerBase.hpp>
+#include <rtt/plugin/PluginLoader.hpp>
 #include <typelib/registry.hh>
 
 #include <general_processing/VectorTocMaker.hpp>
@@ -52,6 +53,11 @@ BaseTask::BaseTask(std::string const& name, RTT::ExecutionEngine* engine)
 BaseTask::~BaseTask()
 {
     delete mpRegistry;
+}
+
+bool BaseTask::loadTypekit(std::string const& name)
+{
+    return RTT::plugin::PluginLoader::Instance()->loadLibrary(name);
 }
 
 RTT::base::OutputPortInterface* BaseTask::createOutputPort(const std::string& port_name,
