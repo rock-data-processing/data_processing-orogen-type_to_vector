@@ -19,6 +19,8 @@
 #include <general_processing/Definitions.hpp>
 #include <general_processing/VectorBuilder.hpp>
 
+#include "../GeneralProcessingTypes.hpp"
+
 namespace orogen_transports {
     class TypelibMarshallerBase;
 }
@@ -79,43 +81,45 @@ struct DataInfo {
 
 
 /** Holds all vector parts and provides methods to get the assembled vector.*/
-class DataVector : public std::vector<SampleData> {
-public:
+struct DataVector : public std::vector<SampleData> {
 
+    /** Will be set to true by component. Setting it to false must to be done by user.*/
     bool mUpdated;
-    bool mUpdatedTime;
-    bool mUpdatedPlaces;
     
-    RTT::base::OutputPortInterface* dataVectorOut;
-    RTT::base::OutputPortInterface* timeVectorOut;
-    RTT::base::OutputPortInterface* placesVectorOut;
+    RTT::base::OutputPortInterface* debugOut;
 
-    DataVector() : mUpdated(false), mUpdatedTime(false), mUpdatedPlaces(false), 
-        dataVectorOut(0), timeVectorOut(0), placesVectorOut(0) {}
+    DataVector() : mUpdated(false), debugOut(0) {}
 
     SampleData* addVectorPart(const DataInfo& info);
 
     /** Copies the data into vector and sets mUpdated to false. 
      *
      * \returns true if part of the vector is new data. */
-    bool getDataVector (base::VectorXd& vector);
+    void getDataVector (base::VectorXd& vector);
 
     /** Copies the time data into time_vector and sets mUpdatedTime to false. 
      *
      * \returns true if part of the vector is new data. */
-    bool getTimeVector (base::VectorXd& time_vector);
+    void getTimeVector (base::VectorXd& time_vector);
     
     /** Copies the time data into time_vector and sets mUpdatedTime to false. 
      *
      * time_vector is expanded so that it has the size of the data vector.
      * \returns true if part of the vector is new data*/
-    bool getExpandedTimeVector (base::VectorXd& time_vector);
+    void getExpandedTimeVector (base::VectorXd& time_vector);
 
     /** Copies the place informations to places_vector and sets mUpdatePlaces to 
      * false. 
      *
      * \returns true if part of the vector is new data*/
-    bool getPlacesVector (StringVector& places_vector);
+    void getPlacesVector (StringVector& places_vector);
+
+
+    /** Puts the current available data to the struct data and returns it. */
+    ConvertedVector& getConvertedVector (ConvertedVector& data);
+
+    /** Write debug data to the port. */
+    void writeDebug(); 
 };
 
 

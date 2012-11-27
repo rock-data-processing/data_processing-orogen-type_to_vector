@@ -11,6 +11,7 @@
 
 #include <base/eigen.h>
 
+#include "../GeneralProcessingTypes.hpp"
 #include "VectorDataStorage.hpp"
 
 #include "BaseTask.hpp"
@@ -94,18 +95,14 @@ RTT::base::OutputPortInterface* BaseTask::createOutputPort(const std::string& po
 bool BaseTask::addDebugOutput(DataVector& vector, int vector_idx) {
 
     if (_debug_ports.get()) {
-        std::string idx_str = boost::lexical_cast<std::string>(vector_idx);
-        vector.dataVectorOut = createOutputPort("debug_data_"+idx_str, "/base/VectorXd");
-        vector.timeVectorOut = createOutputPort("debug_time_"+idx_str, "/base/VectorXd");
-        if ( ! vector.dataVectorOut || ! vector.timeVectorOut )
-            return false;
-    }
 
-    if (_debug_places.get()) {
         std::string idx_str = boost::lexical_cast<std::string>(vector_idx);
-        vector.placesVectorOut = createOutputPort("debug_places_"+idx_str, 
-                "/std/string");
-        if ( ! vector.placesVectorOut ) return false;
+
+        vector.debugOut = createOutputPort("debug_"+idx_str,
+            "/general_processing/ConvertedVector");
+
+        if ( ! vector.debugOut)
+            return false;
     }
 
     return true;
@@ -158,12 +155,8 @@ bool BaseTask::addDataInfo(RTT::base::InputPortInterface* reader, int vector_idx
 
     di.mpVector = &(mVectors.at(vector_idx));
 
-    if ( !di.mpVector->dataVectorOut &&
-         !di.mpVector->timeVectorOut && 
-         !di.mpVector->placesVectorOut ) { 
-        
-        if ( !addDebugOutput(*di.mpVector, vector_idx) ) return false;
-    }
+    if ( !di.mpVector->debugOut && !addDebugOutput(*di.mpVector, vector_idx) ) 
+        return false;
 
     di.mpTargetVector = di.mpVector->addVectorPart(di);
     di.newSample.mpInfo = &di;
@@ -210,14 +203,7 @@ bool BaseTask::addDataInfo(RTT::base::InputPortInterface* reader, int vector_idx
 void BaseTask::sampleCallback(base::Time const& timestamp, SampleData const& sample) {
 
     *(sample.mpInfo->mpTargetVector) = sample;
-
     sample.mpInfo->mpVector->mUpdated = true;
-    sample.mpInfo->mpVector->mUpdatedTime = true;
-
-    if ( ! sample.mPlaces.empty() )
-        sample.mpInfo->mpVector->mUpdatedPlaces = true;
-    else
-        sample.mpInfo->mpVector->mUpdatedPlaces = false;
 }
 
 bool BaseTask::addComponentToVector(::std::string const & component, 
@@ -335,6 +321,8 @@ void BaseTask::cleanupHook()
         it->typelibMarshaller->deleteHandle(it->handle);
         _stream_aligner.unregisterStream(it->streamIndex);
         ports()->removePort(it->readPort->getName());
+        if ( it->mpVector->debugOut )
+            ports()->removePort(it->mpVector->debugOut->getName());
     }
 
     mDataInfos.clear();

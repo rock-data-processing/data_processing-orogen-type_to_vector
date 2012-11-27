@@ -4,6 +4,7 @@
 
 #include <rtt/base/PortInterface.hpp>
 #include <rtt/base/InputPortInterface.hpp>
+#include <rtt/OutputPort.hpp>
 #include <rtt/DataFlowInterface.hpp>
 #include <rtt/typelib/TypelibMarshallerBase.hpp>
 
@@ -49,7 +50,7 @@ SampleData* DataVector::addVectorPart(const DataInfo& info) {
     return &back();
 }
 
-bool DataVector::getDataVector (base::VectorXd& vector) {
+void DataVector::getDataVector (base::VectorXd& vector) {
 
     iterator it = begin();
     int size = 0;
@@ -67,14 +68,9 @@ bool DataVector::getDataVector (base::VectorXd& vector) {
         vector.segment(pos, n) = Eigen::Map<base::VectorXd>(&(it->mData[0]), n);
         pos += n;
     }
-    
-    bool result = mUpdated;
-    mUpdated = false;
-
-    return result;
 }
 
-bool DataVector::getTimeVector(base::VectorXd& time_vector) {
+void DataVector::getTimeVector(base::VectorXd& time_vector) {
 
     time_vector.resize(size());
     
@@ -83,14 +79,9 @@ bool DataVector::getTimeVector(base::VectorXd& time_vector) {
     int i = 0;
     for (; it != end(); it++)
         time_vector[i++] = it->mTime;
-    
-    bool result = mUpdatedTime;
-    mUpdatedTime = false;
-
-    return result;
 }
 
-bool DataVector::getExpandedTimeVector(base::VectorXd& time_vector) {
+void DataVector::getExpandedTimeVector(base::VectorXd& time_vector) {
     
     iterator it = begin();
     int size = 0;
@@ -108,13 +99,25 @@ bool DataVector::getExpandedTimeVector(base::VectorXd& time_vector) {
         time_vector.segment(pos, n) = base::VectorXd::Constant(n,it->mTime);
         pos += n;
     }
-    
-    bool result = mUpdatedTime;
-    mUpdatedTime = false;
-
-    return result;
 }
 
-bool DataVector::getPlacesVector (StringVector& places_vector) {
-    return false;
+void DataVector::getPlacesVector (StringVector& places_vector) {
+    ;
+}
+
+ConvertedVector& DataVector::getConvertedVector (ConvertedVector& data ) {
+
+    getDataVector(data.data);
+    getExpandedTimeVector(data.time);
+    getPlacesVector(data.places);
+    return data;
+}
+
+void DataVector::writeDebug() {
+
+    if ( !debugOut) return;
+    
+    static ConvertedVector data;
+    static_cast<RTT::OutputPort<ConvertedVector>*>(debugOut)->
+        write(getConvertedVector(data));
 }

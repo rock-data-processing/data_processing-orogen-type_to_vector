@@ -4,6 +4,9 @@ version "0.1"
 
 using_library 'general_processing'
 
+import_types_from 'base'
+import_types_from 'GeneralProcessingTypes.hpp'
+
 task_context "BaseTask" do
     doc "This task provides a infrastructure for processing data types as a "+
     "vector of their values. Input ports can pe added, that automatically are "+
@@ -55,4 +58,8 @@ task_context "BaseTask" do
     stream_aligner do
         max_latency 0.1
     end
+end
+
+typekit do
+    export_types "/general_processing/ConvertedVector"
 end
