@@ -159,14 +159,14 @@ bool BaseTask::addDataInfo(RTT::base::InputPortInterface* reader, int vector_idx
     di.conversions = VectorConversion(reader->getName());
 
     if ( mVectors.size() <= vector_idx ) mVectors.resize(vector_idx+1);
+    
+    di.mVectorIndex = vector_idx;
 
-    di.mpVector = &(mVectors.at(vector_idx));
+    DataVector& dv = mVectors.at(vector_idx);
 
-    if ( !di.mpVector->debugOut && !addDebugOutput(*di.mpVector, vector_idx) ) 
+    if ( !dv.debugOut && !addDebugOutput(dv, vector_idx) ) 
         return false;
 
-    di.mpTargetVector = di.mpVector->addVectorPart(di);
-    di.newSample.mpInfo = &di;
     
     aggregator::StreamAligner::Stream<general_processing::SampleData>::callback_t cb = 
         boost::bind(&BaseTask::sampleCallback,this,_1,_2);
@@ -191,27 +191,41 @@ bool BaseTask::addDataInfo(RTT::base::InputPortInterface* reader, int vector_idx
         c_sliced_ptr = ConvertPtr(new ConvertToVector(toc_sliced, *mpRegistry));
     
     ConvertPtr c_time_ptr;
-    if ( toc_time.empty() )
+    if ( toc_time.empty() ) {
         c_time_ptr = ConvertPtr(new TimeNowConversion(toc_time));
-    else {
+        di.hasTime = false;
+    } else {
         toc_time.resize(1);
         ConvertPtr c_single_ptr(new SingleConverter(toc_time));
         c_time_ptr = ConvertPtr(new MultiplyConverter(c_single_ptr, 1.0e-6));
+        di.hasTime = true;
     }
     
     di.conversions.addConverter(c_sliced_ptr);
     di.conversions.addConverter(c_time_ptr);
     
-    mDataInfos.push_back(di);
+    di.newSample.mDataInfoIndex = mDataInfos.size();
+    di.mSampleVectorIndex = dv.addVectorPart();
     
+    mDataInfos.push_back(di);
+
+    log(Info) << "added data info for " << mDataInfos.back().readPort->getName() <<
+        " with type " << mDataInfos.back().conversions.getTypeName() << 
+        " to data infos index " << mDataInfos.size()-1 << " and stream index " <<
+        mDataInfos.back().streamIndex << endlog();
+
     return true;
 }
 
 void BaseTask::sampleCallback(base::Time const& timestamp, SampleData const& sample) {
 
-    *(sample.mpInfo->mpTargetVector) = sample;
-    sample.mpInfo->mpVector->mUpdated = true;
-    sample.mpInfo->mpVector->wroteDebug = false; 
+
+    DataInfo& di = mDataInfos.at(sample.mDataInfoIndex);
+    DataVector& dv = mVectors.at(di.mVectorIndex);
+    
+    dv.at(di.mSampleVectorIndex) = sample;
+    dv.mUpdated = true;
+    dv.wroteDebug = false; 
 }
 
 bool BaseTask::addComponentToVector(::std::string const & component, 
@@ -295,8 +309,9 @@ void BaseTask::clear() {
 
         ports()->removePort(it->readPort->getName());
 
-        if ( it->mpVector->debugOut )
-            ports()->removePort(it->mpVector->debugOut->getName());
+        DataVector& dv = mVectors.at(it->mVectorIndex);
+        if ( dv.debugOut )
+            ports()->removePort(dv.debugOut->getName());
     }
 
     mDataInfos.clear();
@@ -322,18 +337,16 @@ void BaseTask::updateHook()
 
     DataInfos::iterator data_it = mDataInfos.begin();
 
-    for ( ; data_it != mDataInfos.begin(); data_it++ )
-        while ( data_it->update(_create_places.get()) ); 
+    for ( ; data_it != mDataInfos.end(); data_it++ ) {
+        while ( data_it->update(_create_places.get()) );
+    }
 
     while ( _stream_aligner.step() ) {
-        
+
         if ( _debug_conversion.get() ) {
             Vectors::iterator vector_it = mVectors.begin();
-            for ( ; vector_it != mVectors.end(); vector_it++ )
-                vector_it->writeDebug();
+            for ( ; vector_it != mVectors.end(); vector_it++ ) vector_it->writeDebug();
         }
-
-        processingStepCallback();
     }
 }
 

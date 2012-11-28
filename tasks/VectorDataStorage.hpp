@@ -49,10 +49,7 @@ struct SampleData {
     double mTime;
     StringVector mPlaces;
     
-    const DataInfo* mpInfo;
-
-    SampleData() : mTime(0), mpInfo(0) {}
-    SampleData(const DataInfo& info) : mTime(0), mpInfo(&info) {}
+    int mDataInfoIndex;
 };
 
 struct DataVector;
@@ -67,14 +64,16 @@ struct DataInfo {
     RTT::base::InputPortInterface* readPort;
 
     VectorConversion conversions;
+
+    bool hasTime; //!< True if the type has a time field.
    
     int streamIndex; //!< Index of stream in the streamAligner.
     aggregator::StreamAligner* pStreamAligner;
 
     SampleData newSample;
     
-    DataVector* mpVector; //!< Vector to put the data in. 
-    SampleData* mpTargetVector;
+    int mVectorIndex; //!< Vector to put the data in. 
+    int mSampleVectorIndex;
 
     bool update(bool create_places=false);
 };
@@ -93,7 +92,8 @@ struct DataVector : public std::vector<SampleData> {
 
     DataVector() : mUpdated(false), debugOut(0) {}
 
-    SampleData* addVectorPart(const DataInfo& info);
+    /** Adds a part of the vector and returns the index. */
+    int addVectorPart();
 
     /** Copies the data into vector and sets mUpdated to false. 
      *
