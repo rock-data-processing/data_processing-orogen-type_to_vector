@@ -90,7 +90,7 @@ struct DataVector : public std::vector<SampleData> {
     
     RTT::base::OutputPortInterface* debugOut;
 
-    DataVector() : mUpdated(false), debugOut(0) {}
+    DataVector() : mUpdated(false), wroteDebug(true), debugOut(0) {}
 
     /** Adds a part of the vector and returns the index. */
     int addVectorPart();

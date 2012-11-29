@@ -11,6 +11,7 @@
 #include <general_processing/Converter.hpp>
 
 #include <base/eigen.h>
+#include <base/samples/rigid_body_state.h>
 
 #include "../GeneralProcessingTypes.hpp"
 #include "VectorDataStorage.hpp"
@@ -147,6 +148,45 @@ bool BaseTask::addInputPort(DataInfo& di, RTT::base::InputPortInterface* reader)
     return true;
 }
 
+void BaseTask::addConvertersToInfo(DataInfo& di, const std::string& slice) {
+    
+    VectorToc toc = VectorTocMaker().apply(
+        *(mpRegistry->get(di.typelibMarshaller->getMarshallingType())) );
+
+    log(Debug) << "--- created toc for " << toc.mType << ":\n";
+    VectorToc::const_iterator its = toc.begin();
+    for ( ; its != toc.end(); its++)
+        log(Debug) << its->placeDescription << " @ " << its->position << "\n";
+    log(Debug) << endlog();
+
+    VectorToc toc_sliced = VectorTocSlicer::slice(toc, slice);
+    VectorToc toc_time = VectorTocSlicer::slice(toc, _time_fields.get());
+
+    typedef AbstractConverter::Pointer ConvertPtr;
+
+    ConvertPtr c_sliced_ptr;
+    if ( toc_sliced.isFlat() )
+        c_sliced_ptr = ConvertPtr(new FlatConverter(toc_sliced));
+    else {
+        c_sliced_ptr = ConvertPtr(new ConvertToVector(toc_sliced, *mpRegistry));
+        boost::static_pointer_cast<ConvertToVector>(c_sliced_ptr)->setSlice(slice);
+    }
+
+    ConvertPtr c_time_ptr;
+    if ( toc_time.empty() ) {
+        c_time_ptr = ConvertPtr(new TimeNowConversion(toc_time));
+        di.hasTime = false;
+    } else {
+        toc_time.resize(1);
+        ConvertPtr c_single_ptr(new SingleConverter(toc_time));
+        c_time_ptr = ConvertPtr(new MultiplyConverter(c_single_ptr, 1.0e-6));
+        di.hasTime = true;
+    }
+    
+    di.conversions.addConverter(c_sliced_ptr);
+    di.conversions.addConverter(c_time_ptr);
+}
+
 bool BaseTask::addDataInfo(RTT::base::InputPortInterface* reader, int vector_idx,
         const std::string& slice) {
     
@@ -166,8 +206,7 @@ bool BaseTask::addDataInfo(RTT::base::InputPortInterface* reader, int vector_idx
 
     if ( !dv.debugOut && !addDebugOutput(dv, vector_idx) ) 
         return false;
-
-    
+ 
     aggregator::StreamAligner::Stream<general_processing::SampleData>::callback_t cb = 
         boost::bind(&BaseTask::sampleCallback,this,_1,_2);
 
@@ -175,37 +214,11 @@ bool BaseTask::addDataInfo(RTT::base::InputPortInterface* reader, int vector_idx
             0, base::Time());
 
     di.pStreamAligner = &_stream_aligner;
-    
-    VectorToc toc = VectorTocMaker().apply(
-        *(mpRegistry->get(di.typelibMarshaller->getMarshallingType())) );
-
-    VectorToc toc_sliced = VectorTocSlicer::slice(toc, slice);
-    VectorToc toc_time = VectorTocSlicer::slice(toc, _time_fields.get());
-
-    typedef AbstractConverter::Pointer ConvertPtr;
-
-    ConvertPtr c_sliced_ptr;
-    if ( toc_sliced.isFlat() )
-        c_sliced_ptr = ConvertPtr(new FlatConverter(toc_sliced));
-    else
-        c_sliced_ptr = ConvertPtr(new ConvertToVector(toc_sliced, *mpRegistry));
-    
-    ConvertPtr c_time_ptr;
-    if ( toc_time.empty() ) {
-        c_time_ptr = ConvertPtr(new TimeNowConversion(toc_time));
-        di.hasTime = false;
-    } else {
-        toc_time.resize(1);
-        ConvertPtr c_single_ptr(new SingleConverter(toc_time));
-        c_time_ptr = ConvertPtr(new MultiplyConverter(c_single_ptr, 1.0e-6));
-        di.hasTime = true;
-    }
-    
-    di.conversions.addConverter(c_sliced_ptr);
-    di.conversions.addConverter(c_time_ptr);
-    
+     
     di.newSample.mDataInfoIndex = mDataInfos.size();
     di.mSampleVectorIndex = dv.addVectorPart();
+
+    addConvertersToInfo(di, slice);
     
     mDataInfos.push_back(di);
 
@@ -222,8 +235,16 @@ void BaseTask::sampleCallback(base::Time const& timestamp, SampleData const& sam
 
     DataInfo& di = mDataInfos.at(sample.mDataInfoIndex);
     DataVector& dv = mVectors.at(di.mVectorIndex);
+            
+    log(Info) << "callback for data from " << di.readPort->getName() << endlog();
     
     dv.at(di.mSampleVectorIndex) = sample;
+
+    log(Info) << "sample: ";
+    for (int i=0; i < sample.mData.size(); i++)
+        log(Info) << " " << sample.mData[i];
+    log(Info) << endlog();
+
     dv.mUpdated = true;
     dv.wroteDebug = false; 
 }

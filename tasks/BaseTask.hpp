@@ -46,6 +46,9 @@ namespace general_processing {
        
         /** Adds an input port to data infos. */ 
         bool addInputPort(DataInfo& di, RTT::base::InputPortInterface* reader);
+
+        /** Adds the converters to the data info. */
+        void addConvertersToInfo(DataInfo& di, const std::string& slice);
        
         /** Adds data conversion informations. */ 
         bool addDataInfo(RTT::base::InputPortInterface* reader, int vector_idx, 

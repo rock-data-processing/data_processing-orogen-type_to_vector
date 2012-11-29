@@ -49,7 +49,7 @@ bool DataInfo::update(bool create_places) {
             newSample.mPlaces = conversions.getPlaces(DATACONVERSION);
         else
             newSample.mPlaces.clear();
-        
+       
         return true;
     }  
     return false;
