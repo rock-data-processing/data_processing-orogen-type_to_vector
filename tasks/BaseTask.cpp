@@ -236,14 +236,7 @@ void BaseTask::sampleCallback(base::Time const& timestamp, SampleData const& sam
     DataInfo& di = mDataInfos.at(sample.mDataInfoIndex);
     DataVector& dv = mVectors.at(di.mVectorIndex);
             
-    log(Info) << "callback for data from " << di.readPort->getName() << endlog();
-    
     dv.at(di.mSampleVectorIndex) = sample;
-
-    log(Info) << "sample: ";
-    for (int i=0; i < sample.mData.size(); i++)
-        log(Info) << " " << sample.mData[i];
-    log(Info) << endlog();
 
     dv.mUpdated = true;
     dv.wroteDebug = false; 
@@ -361,13 +354,13 @@ void BaseTask::updateHook()
     for ( ; data_it != mDataInfos.end(); data_it++ ) {
         while ( data_it->update(_create_places.get()) );
     }
-
-    while ( _stream_aligner.step() ) {
-
-        if ( _debug_conversion.get() ) {
-            Vectors::iterator vector_it = mVectors.begin();
-            for ( ; vector_it != mVectors.end(); vector_it++ ) vector_it->writeDebug();
-        }
+    
+    while ( _stream_aligner.step() );
+        
+    if ( _debug_conversion.get() ) {
+        Vectors::iterator vector_it = mVectors.begin();
+        for ( ; vector_it != mVectors.end(); vector_it++ )
+            vector_it->writeDebug();
     }
 }
 

@@ -5,7 +5,7 @@ Orocos.initialize
 
 ENV['BASE_LOG_LEVEL'] = 'DEBUG'
 ENV['BASE_LOG_FORMAT'] = 'SHORT'
-ENV['ORO_LOGLEVEL'] = '5'
+ENV['ORO_LOGLEVEL'] = '6'
 
 # Testing the debug port creation
 
@@ -15,7 +15,7 @@ Orocos.run 'general_processing_test' do |p|
     task = TaskContext.get 'TestBaseTask'
 
     task.debug_conversion = true
-    task.create_places = false
+    task.create_places = true
     task.aggregator_max_latency = 0.01
 
     task.createInputPort("rbs1","/base/samples/RigidBodyState","position orientation",0)
@@ -94,7 +94,7 @@ Orocos.run 'general_processing_test' do |p|
         puts "data:"
         puts cv.data
         puts "places:"
-        puts cv.places
+        pp cv.places
     end
     
     if cv = r_d2.read()
@@ -104,7 +104,7 @@ Orocos.run 'general_processing_test' do |p|
         puts "data:"
         puts cv.data
         puts "places:"
-        puts cv.places
+        pp cv.places
     end
 
     Readline.readline "Press enter to quit" do

@@ -42,14 +42,14 @@ bool DataInfo::update(bool create_places) {
             t = base::Time::now();
             newSample.mTime = t.toSeconds();
         } 
-
-        pStreamAligner->push(streamIndex, t, newSample);
-
+        
         if ( create_places )
             newSample.mPlaces = conversions.getPlaces(DATACONVERSION);
         else
             newSample.mPlaces.clear();
-       
+
+        pStreamAligner->push(streamIndex, t, newSample);
+
         return true;
     }  
     return false;
@@ -113,7 +113,17 @@ void DataVector::getExpandedTimeVector(base::VectorXd& time_vector) {
 }
 
 void DataVector::getPlacesVector (StringVector& places_vector) {
-    ;
+    iterator it = begin();
+    int size = 0;
+    
+    for ( ; it != end(); it++ )
+        size += it->mPlaces.size();
+
+    places_vector.clear();
+    places_vector.reserve(size);
+
+    for ( it = begin(); it != end(); it++ )
+       places_vector.insert(places_vector.end(),it->mPlaces.begin(), it->mPlaces.end());
 }
 
 ConvertedVector& DataVector::getConvertedVector (ConvertedVector& data ) {
