@@ -64,6 +64,20 @@ task_context "BaseTask" do
 
 end
 
+task_context "BufferedDataTask" do
+    subclasses "BaseTask"
+    
+    operation("setBufferFromTime").
+        returns("int").
+        argument("delta_time", "/base/Time", "time distance between two consecutive samples").
+        argument("window_start", "/base/Time", "the time the window starts from now back in time").
+        argument("window_length", "/base/Time", "the lenght of the window").
+        doc("computes the needed buffer lenght and sets the property buffer_size")
+
+    property("buffer_size","int").
+        doc "how many vectors can be stored in the buffer"
+end
+
 typekit do
     export_types "/general_processing/ConvertedVector"
 end
