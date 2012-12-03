@@ -122,6 +122,9 @@ struct DataVector : public std::vector<SampleData> {
 
     /** Write debug data to the port. */
     void writeDebug();
+
+    /** Returns true, if all parts have been update once. */
+    bool isFilled();
 };
 
 

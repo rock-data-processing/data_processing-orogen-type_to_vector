@@ -143,3 +143,11 @@ void DataVector::writeDebug() {
         write(getConvertedVector(data));
     wroteDebug = true;
 }
+
+bool DataVector::isFilled() {
+
+    for ( const_iterator it = begin(); it != end(); it++)
+        if ( it->empty() ) return false;
+
+    return true;
+}
