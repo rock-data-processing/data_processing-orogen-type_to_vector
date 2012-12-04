@@ -147,7 +147,7 @@ void DataVector::writeDebug() {
 bool DataVector::isFilled() {
 
     for ( const_iterator it = begin(); it != end(); it++)
-        if ( it->empty() ) return false;
+        if ( it->mData.empty() ) return false;
 
     return true;
 }
