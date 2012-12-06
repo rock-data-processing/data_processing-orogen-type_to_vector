@@ -8,13 +8,13 @@
 namespace Typelib {
     class Registry;
 }
+
 namespace RTT{ 
     namespace base{
         class OutputPortInterface;
     }
 }
-
-        
+      
 namespace general_processing {
     
     struct DataInfo;
@@ -50,18 +50,20 @@ namespace general_processing {
         /** Adds the converters to the data info. */
         void addConvertersToInfo(DataInfo& di, const std::string& slice);
        
-        /** Adds data conversion informations. */ 
-        bool addDataInfo(RTT::base::InputPortInterface* reader, int vector_idx, 
-                const std::string& slice);
 
         /** Callback function for the StreamAligner. */
         void sampleCallback(base::Time const& timestamp, SampleData const& sample);
 
-        void clear();
 
     protected:
         
-        bool loadTypekit(std::string const& name);
+        /** Adds data conversion informations. */ 
+        virtual bool addDataInfo(RTT::base::InputPortInterface* reader, int vector_idx, 
+                const std::string& slice);
+        
+        virtual void clear();
+        
+        virtual bool loadTypekit(std::string const& name);
         
         /** Add all ports of a component to a vector.  */
         virtual bool addComponentToVector(::std::string const & component, 
@@ -85,15 +87,17 @@ namespace general_processing {
          * Overwrite it to process data after each step. Otherwise use the 
          * update hook to implement algorithms. */
         virtual void processingStepCallback();
+
+        const DataVector& getDataVector(int vector_idx) const; 
         
-        /** Get the data of the vector at vector_idx. */
-        void getDataVector(int vector_idx, base::VectorXd& vector);
+        /** Get the vector at vector_idx. */
+        void getVector(int vector_idx, base::VectorXd& vector) const;
 
         /** Get the time vector of vector at vector_idx. */
-        void getTimeVector(int vector_idx, base::VectorXd& time_vector);
+        void getTimeVector(int vector_idx, base::VectorXd& time_vector) const;
 
         /** Get a time vector that has the size of the data vector.  */
-        void getExpandedTimeVector(int vector_idx, base::VectorXd& time_vector);
+        void getExpandedTimeVector(int vector_idx, base::VectorXd& time_vector) const;
 
     public:
         /** TaskContext constructor for BaseTask

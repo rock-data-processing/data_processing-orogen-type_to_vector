@@ -298,15 +298,20 @@ void BaseTask::processingStepCallback() {
 
 }
 
-void BaseTask::getDataVector(int vector_idx, base::VectorXd& vector) {
-    mVectors.at(vector_idx).getDataVector(vector);
+
+const DataVector& BaseTask::getDataVector(int vector_idx) const { 
+    return mVectors.at(vector_idx); 
 }
 
-void BaseTask::getTimeVector(int vector_idx, base::VectorXd& time_vector) {
+void BaseTask::getVector(int vector_idx, base::VectorXd& vector) const {
+    mVectors.at(vector_idx).getVector(vector);
+}
+
+void BaseTask::getTimeVector(int vector_idx, base::VectorXd& time_vector) const {
     mVectors.at(vector_idx).getTimeVector(time_vector);
 }
 
-void BaseTask::getExpandedTimeVector(int vector_idx, base::VectorXd& time_vector) {
+void BaseTask::getExpandedTimeVector(int vector_idx, base::VectorXd& time_vector) const {
     mVectors.at(vector_idx).getExpandedTimeVector(time_vector);
 }
     

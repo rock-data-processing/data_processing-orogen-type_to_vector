@@ -14,16 +14,17 @@
 #ifndef GENERAL_PROCESSING_DATASTORAGE_HPP
 #define GENERAL_PROCESSING_DATASTORAGE_HPP
 
+#include <boost/shared_ptr.hpp>
+
 #include <rtt/base/DataSourceBase.hpp>
+
+#include <rtt/typelib/TypelibMarshallerBase.hpp>
 
 #include <general_processing/Definitions.hpp>
 #include <general_processing/VectorBuilder.hpp>
+#include <general_processing/MatrixBuffer.hpp>
 
 #include "../GeneralProcessingTypes.hpp"
-
-namespace orogen_transports {
-    class TypelibMarshallerBase;
-}
 
 namespace RTT {
     namespace Base {
@@ -97,36 +98,73 @@ struct DataVector : public std::vector<SampleData> {
 
     /** Copies the data into vector and sets mUpdated to false. 
      *
-     * \returns true if part of the vector is new data. */
-    void getDataVector (base::VectorXd& vector);
+     * \returns true if part of the vector is newdata. */
+    void getVector (base::VectorXd& vector) const;
 
     /** Copies the time data into time_vector and sets mUpdatedTime to false. 
      *
      * \returns true if part of the vector is new data. */
-    void getTimeVector (base::VectorXd& time_vector);
+    void getTimeVector (base::VectorXd& time_vector) const;
     
     /** Copies the time data into time_vector and sets mUpdatedTime to false. 
      *
      * time_vector is expanded so that it has the size of the data vector.
      * \returns true if part of the vector is new data*/
-    void getExpandedTimeVector (base::VectorXd& time_vector);
+    void getExpandedTimeVector (base::VectorXd& time_vector) const;
 
     /** Copies the place informations to places_vector and sets mUpdatePlaces to 
      * false. 
      *
      * \returns true if part of the vector is new data*/
-    void getPlacesVector (StringVector& places_vector);
+    void getPlacesVector (StringVector& places_vector) const;
 
     /** Puts the current available data to the struct data and returns it. */
-    ConvertedVector& getConvertedVector (ConvertedVector& data);
+    ConvertedVector& getConvertedVector (ConvertedVector& data) const;
 
     /** Write debug data to the port. */
     void writeDebug();
 
     /** Returns true, if all parts have been update once. */
-    bool isFilled();
+    bool isFilled() const;
+
+    /** Returns the size of the vector currently available with \p getDataVector. */
+    int vectorSize() const;
 };
 
+
+typedef boost::shared_ptr<MatrixBuffer> BufferPointer;
+
+/** Buffering data vectors. */
+struct VectorBuffer {
+
+    int mDataVectorIndex;
+    
+protected:
+    BufferPointer mDataBuffer;
+    BufferPointer mTimeBuffer;
+
+    base::VectorXd mStoreVector;
+
+public:
+
+    bool create(const DataVector& dv, int vector_count, bool buffer_time=true);
+
+    void push(const DataVector& dv);
+
+    /** Returns true if there was a matrix to get. */
+    bool getDataMatrix(int from, int to, base::MatrixXd& matrix);
+    bool getTimeMatrix(int from, int to, base::MatrixXd& matrix);
+    
+    bool getDataMatrix(double from_time, double to_time, double delta_time,
+          base::MatrixXd& matrix);  
+    bool getTimeMatrix(double from_time, double to_time, double delta_time,
+          base::MatrixXd& matrix);
+
+    bool isFilled() const { return mDataBuffer->isFilled(); }
+
+    bool isCreated() const { return mDataBuffer.get(); }
+
+};
 
 }
 #endif // GENERAL_PROCESSING_DATASTORAGE_HPP

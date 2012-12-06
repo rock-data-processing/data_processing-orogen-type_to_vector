@@ -66,16 +66,22 @@ end
 
 task_context "BufferedDataTask" do
     subclasses "BaseTask"
+
+    doc "In addition to the BaseTask the data are buffered. The size of the incoming "+
+        "data must not change."
     
-    operation("setBufferFromTime").
+    operation("setBufferSizeFromTime").
         returns("int").
         argument("delta_time", "/base/Time", "time distance between two consecutive samples").
         argument("window_start", "/base/Time", "the time the window starts from now back in time").
         argument("window_length", "/base/Time", "the lenght of the window").
-        doc("computes the needed buffer lenght and sets the property buffer_size")
+        doc("computes the needed buffer length and sets the property buffer_size")
 
     property("buffer_size","int").
         doc "how many vectors can be stored in the buffer"
+
+    property("buffer_time","bool").
+        doc "buffers the time stamps of the vector elements as well"
 end
 
 typekit do

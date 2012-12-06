@@ -6,7 +6,6 @@
 #include <rtt/base/InputPortInterface.hpp>
 #include <rtt/OutputPort.hpp>
 #include <rtt/DataFlowInterface.hpp>
-#include <rtt/typelib/TypelibMarshallerBase.hpp>
 
 #include <aggregator/StreamAligner.hpp>
 
@@ -56,32 +55,30 @@ bool DataInfo::update(bool create_places) {
 }
     
 
-int DataVector::addVectorPart() {
+int DataVector::addVectorPart () {
+
     push_back(SampleData());
+
     return size()-1;
 }
 
-void DataVector::getDataVector (base::VectorXd& vector) {
+void DataVector::getVector (base::VectorXd& vector) const {
 
-    iterator it = begin();
-    int size = 0;
-
-    for ( ; it != end(); it++ )
-        size += it->mData.size();
-
+    int size = vectorSize();
+    
     vector.resize(size);
-
+ 
     int pos = 0;
-    it = begin();
+    const_iterator it = begin();
     for (; it != end(); it++) {
         int n = it->mData.size();
         if (n == 0) continue;
-        vector.segment(pos, n) = Eigen::Map<base::VectorXd>(&(it->mData[0]), n);
+        vector.segment(pos, n) = Eigen::Map<const base::VectorXd>(&(it->mData[0]), n);
         pos += n;
     }
 }
 
-void DataVector::getTimeVector(base::VectorXd& time_vector) {
+void DataVector::getTimeVector (base::VectorXd& time_vector) const {
 
     time_vector.resize(size());
     
@@ -92,18 +89,14 @@ void DataVector::getTimeVector(base::VectorXd& time_vector) {
         time_vector[i++] = it->mTime;
 }
 
-void DataVector::getExpandedTimeVector(base::VectorXd& time_vector) {
+void DataVector::getExpandedTimeVector (base::VectorXd& time_vector) const {
     
-    iterator it = begin();
-    int size = 0;
-
-    for ( ; it != end(); it++ )
-        size += it->mData.size();
+    int size = vectorSize();
 
     time_vector.resize(size);
     
     int pos = 0;
-    it = begin();
+    const_iterator it = begin();
     for (; it != end(); it++) {
         int n = it->mData.size();
         if (n == 0) continue;
@@ -112,8 +105,9 @@ void DataVector::getExpandedTimeVector(base::VectorXd& time_vector) {
     }
 }
 
-void DataVector::getPlacesVector (StringVector& places_vector) {
-    iterator it = begin();
+void DataVector::getPlacesVector (StringVector& places_vector) const {
+
+    const_iterator it = begin();
     int size = 0;
     
     for ( ; it != end(); it++ )
@@ -126,9 +120,9 @@ void DataVector::getPlacesVector (StringVector& places_vector) {
        places_vector.insert(places_vector.end(),it->mPlaces.begin(), it->mPlaces.end());
 }
 
-ConvertedVector& DataVector::getConvertedVector (ConvertedVector& data ) {
+ConvertedVector& DataVector::getConvertedVector (ConvertedVector& data ) const {
 
-    getDataVector(data.data);
+    getVector(data.data);
     getExpandedTimeVector(data.time);
     getPlacesVector(data.places);
     return data;
@@ -144,10 +138,89 @@ void DataVector::writeDebug() {
     wroteDebug = true;
 }
 
-bool DataVector::isFilled() {
+bool DataVector::isFilled() const {
 
     for ( const_iterator it = begin(); it != end(); it++)
         if ( it->mData.empty() ) return false;
 
     return true;
+}
+
+int DataVector::vectorSize() const {
+
+    const_iterator it = begin();
+    int size = 0;
+
+    for ( ; it != end(); it++ )
+        size += it->mData.size();
+
+    return size;
+}
+
+bool VectorBuffer::create (const DataVector& dv, int vector_count, bool buffer_time) {
+
+    if ( !dv.isFilled() ) return false;
+
+    if ( mDataBuffer.get()) 
+        if ( mDataBuffer->getVectorSize() == dv.vectorSize() && 
+                mDataBuffer->getVectorCount() == vector_count ) 
+            return true; 
+        else 
+            return false;
+
+    mDataBuffer.reset( new MatrixBuffer(dv.vectorSize(), vector_count) );
+    
+    if ( buffer_time ) 
+        mTimeBuffer.reset( new MatrixBuffer(dv.vectorSize(), vector_count) );
+
+    return true;
+}
+
+void VectorBuffer::push (const DataVector& dv) {
+
+    dv.getVector(mStoreVector);
+
+    mDataBuffer->push(mStoreVector);
+
+    if ( mTimeBuffer.get() ) {
+        dv.getExpandedTimeVector(mStoreVector);
+        mTimeBuffer->push(mStoreVector);
+    }
+}
+
+bool VectorBuffer::getDataMatrix (int from, int to, base::MatrixXd& matrix) {
+
+    if ( !mDataBuffer.get() ) return false;
+
+    Eigen::MatrixXd mat;
+
+    mDataBuffer->getMatrix(from,to,mat);
+    matrix = mat;
+    return true;
+}
+
+bool VectorBuffer::getTimeMatrix (int from, int to, base::MatrixXd& matrix) {
+
+    if ( !mTimeBuffer.get() ) return false;
+
+    mTimeBuffer->getMatrix(from,to,matrix);
+    return true;
+}
+
+bool VectorBuffer::getDataMatrix (double from_time, double to_time, double delta_time,
+        base::MatrixXd& matrix) {
+
+    int from = from_time / delta_time;
+    int to = to_time / delta_time;
+
+    return getDataMatrix(from,to,matrix);
+}
+
+bool VectorBuffer::getTimeMatrix (double from_time, double to_time, double delta_time,
+        base::MatrixXd& matrix) {
+
+    int from = from_time / delta_time;
+    int to = to_time / delta_time;
+
+    return getTimeMatrix(from,to,matrix);
 }
