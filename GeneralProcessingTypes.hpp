@@ -27,6 +27,12 @@ struct ConvertedVector {
     StringVector places;
 };
 
+struct BufferContent {
+
+    base::MatrixXd data;
+    base::MatrixXd time;
+};
+
 }
 
 #endif // GENERALPROCESSING_GENERALPROCESSINGTYPES_HPP

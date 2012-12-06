@@ -224,3 +224,17 @@ bool VectorBuffer::getTimeMatrix (double from_time, double to_time, double delta
 
     return getTimeMatrix(from,to,matrix);
 }
+
+BufferContent& VectorBuffer::getBufferContent(BufferContent& content) {
+    getDataMatrix(0,-1,content.data);
+    getTimeMatrix(0,-1,content.time);
+}
+    
+void VectorBuffer::writeDebug() {
+
+        if ( !debugOut ) return;
+
+        static BufferContent bc;
+        static_cast<RTT::OutputPort<BufferContent>*>(debugOut)->
+            write(getBufferContent(bc));
+}

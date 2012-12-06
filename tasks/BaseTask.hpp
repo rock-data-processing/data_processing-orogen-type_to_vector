@@ -37,10 +37,6 @@ namespace general_processing {
         DataInfos mDataInfos;
         Vectors mVectors;
 
-        /** Creates an ouptput port. */
-        RTT::base::OutputPortInterface* createOutputPort(const std::string& port_name,
-                const std::string& type_name);    
-
         /** Add ports for debug output. */
         bool addDebugOutput(DataVector& vector, int vector_idx);
        
@@ -57,6 +53,10 @@ namespace general_processing {
 
     protected:
         
+        /** Creates an ouptput port. */
+        RTT::base::OutputPortInterface* createOutputPort(const std::string& port_name,
+                const std::string& type_name);    
+
         /** Adds data conversion informations. */ 
         virtual bool addDataInfo(RTT::base::InputPortInterface* reader, int vector_idx, 
                 const std::string& slice);

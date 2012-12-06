@@ -146,6 +146,8 @@ protected:
     base::VectorXd mStoreVector;
 
 public:
+    
+    RTT::base::OutputPortInterface* debugOut;
 
     bool create(const DataVector& dv, int vector_count, bool buffer_time=true);
 
@@ -164,6 +166,9 @@ public:
 
     bool isCreated() const { return mDataBuffer.get(); }
 
+    BufferContent& getBufferContent(BufferContent& content);
+
+    void writeDebug();
 };
 
 }

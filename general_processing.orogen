@@ -82,6 +82,9 @@ task_context "BufferedDataTask" do
 
     property("buffer_time","bool").
         doc "buffers the time stamps of the vector elements as well"
+
+    property("debug_buffer","bool").
+        doc "if true, a debug output port for the buffer data is created"
 end
 
 typekit do
