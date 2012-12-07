@@ -16,7 +16,7 @@
 using namespace general_processing;
 using RTT::log;
 using RTT::endlog;
-using RTT::Debug;
+using RTT::Info;
     
 bool DataInfo::update(bool create_places) {
        
@@ -168,6 +168,9 @@ bool VectorBuffer::create (const DataVector& dv, int vector_count, bool buffer_t
         else 
             return false;
 
+    log(Info) << "Creating buffer for " << vector_count << " vectors of size " << 
+        dv.vectorSize() << endlog();
+
     mDataBuffer.reset( new MatrixBuffer(dv.vectorSize(), vector_count) );
     
     if ( buffer_time ) 
@@ -228,6 +231,7 @@ bool VectorBuffer::getTimeMatrix (double from_time, double to_time, double delta
 BufferContent& VectorBuffer::getBufferContent(BufferContent& content) {
     getDataMatrix(0,-1,content.data);
     getTimeMatrix(0,-1,content.time);
+    return content;
 }
     
 void VectorBuffer::writeDebug() {
@@ -235,6 +239,7 @@ void VectorBuffer::writeDebug() {
         if ( !debugOut ) return;
 
         static BufferContent bc;
+
         static_cast<RTT::OutputPort<BufferContent>*>(debugOut)->
             write(getBufferContent(bc));
 }

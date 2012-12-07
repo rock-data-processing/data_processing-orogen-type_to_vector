@@ -46,12 +46,13 @@ namespace general_processing {
         /** Adds the converters to the data info. */
         void addConvertersToInfo(DataInfo& di, const std::string& slice);
        
-
         /** Callback function for the StreamAligner. */
         void sampleCallback(base::Time const& timestamp, SampleData const& sample);
 
-
     protected:
+        
+        /** Processing a sample is called by sampleCallback. */
+        virtual void processSample(base::Time const& timestamp, SampleData const& sample);
         
         /** Creates an ouptput port. */
         RTT::base::OutputPortInterface* createOutputPort(const std::string& port_name,
@@ -82,13 +83,9 @@ namespace general_processing {
                                      ::std::string const & slice, 
                                      boost::int32_t to_vector);
 
-        /** This functions is called after every positive step of the stream aligner.
-         *
-         * Overwrite it to process data after each step. Otherwise use the 
-         * update hook to implement algorithms. */
-        virtual void processingStepCallback();
+        const DataVector& getDataVector(int vector_idx) const;
 
-        const DataVector& getDataVector(int vector_idx) const; 
+        const DataInfo& getDataInfo(int index) const;
         
         /** Get the vector at vector_idx. */
         void getVector(int vector_idx, base::VectorXd& vector) const;

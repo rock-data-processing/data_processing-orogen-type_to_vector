@@ -21,6 +21,9 @@ namespace general_processing {
 
     protected:
         
+        /** Processing a sample is called by sampleCallback. */
+        virtual void processSample(base::Time const& timestamp, SampleData const& sample);
+        
         /** Adds data conversion informations. */ 
         virtual bool addDataInfo(RTT::base::InputPortInterface* reader, int vector_idx, 
                 const std::string& slice);

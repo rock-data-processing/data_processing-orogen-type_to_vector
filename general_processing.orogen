@@ -49,10 +49,10 @@ task_context "BaseTask" do
         argument("to_vector", "/int", "index of the vector it should be added to").
         doc("creates an input port at runtime and add it to a vector conversion")
 
-    property("debug_conversion","/bool").
+    property("debug_conversion","/bool",false).
         doc "create a debug port for a vector and sends the conversion results to it"
 
-    property("create_places","/bool").
+    property("create_places","/bool",false).
         doc "creates place information during conversion"
     
     property("time_fields","/std/string","time").
@@ -77,23 +77,29 @@ task_context "BufferedDataTask" do
         argument("window_length", "/base/Time", "the lenght of the window").
         doc("computes the needed buffer length and sets the property buffer_size")
 
-    property("buffer_size","int").
+    property("buffer_size","int",1).
         doc "how many vectors can be stored in the buffer"
 
-    property("buffer_time","bool").
+    property("buffer_time","bool",false).
         doc "buffers the time stamps of the vector elements as well"
 
-    property("debug_buffer","bool").
+    property("buffer_new_only","bool",false).
+        doc "buffers only new data vs. buffer in every updatHook"
+
+    property("debug_buffer","bool",false).
         doc "if true, a debug output port for the buffer data is created"
 end
 
 typekit do
     export_types "/general_processing/ConvertedVector"
+    export_types "/general_processing/BufferContent"
 end
 
 deployment "general_processing_test" do
     do_not_install
     task('TestBaseTask','general_processing::BaseTask').
+        periodic(0.1)
+    task('TestBufferedTask','general_processing::BufferedDataTask').
         periodic(0.1)
     add_default_logger
 end

@@ -230,9 +230,8 @@ bool BaseTask::addDataInfo(RTT::base::InputPortInterface* reader, int vector_idx
     return true;
 }
 
-void BaseTask::sampleCallback(base::Time const& timestamp, SampleData const& sample) {
-
-
+void BaseTask::processSample(base::Time const& timestamp, SampleData const& sample) {
+    
     DataInfo& di = mDataInfos.at(sample.mDataInfoIndex);
     DataVector& dv = mVectors.at(di.mVectorIndex);
             
@@ -240,6 +239,12 @@ void BaseTask::sampleCallback(base::Time const& timestamp, SampleData const& sam
 
     dv.mUpdated = true;
     dv.wroteDebug = false; 
+}
+
+
+void BaseTask::sampleCallback(base::Time const& timestamp, SampleData const& sample) {
+
+   processSample(timestamp, sample);
 }
 
 bool BaseTask::addComponentToVector(::std::string const & component, 
@@ -294,13 +299,12 @@ bool BaseTask::createInputPort(::std::string const & port_name,
     return addDataInfo(in_port, to_vector, slice);  
 }
 
-void BaseTask::processingStepCallback() {
-
-}
-
-
 const DataVector& BaseTask::getDataVector(int vector_idx) const { 
     return mVectors.at(vector_idx); 
+}
+        
+const DataInfo& BaseTask::getDataInfo(int index) const {
+    return mDataInfos.at(index);
 }
 
 void BaseTask::getVector(int vector_idx, base::VectorXd& vector) const {

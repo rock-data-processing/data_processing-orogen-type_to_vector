@@ -138,6 +138,8 @@ typedef boost::shared_ptr<MatrixBuffer> BufferPointer;
 struct VectorBuffer {
 
     int mDataVectorIndex;
+
+    bool newData;
     
 protected:
     BufferPointer mDataBuffer;
@@ -146,6 +148,8 @@ protected:
     base::VectorXd mStoreVector;
 
 public:
+
+    VectorBuffer() : mDataVectorIndex(-1), newData(false), debugOut(0) {}
     
     RTT::base::OutputPortInterface* debugOut;
 

@@ -20,6 +20,16 @@ BufferedDataTask::~BufferedDataTask()
 {
 }
 
+void BufferedDataTask::processSample(base::Time const& timestamp, SampleData const& sample) {
+
+    BaseTask::processSample(timestamp, sample);
+
+    const DataInfo& di = getDataInfo(sample.mDataInfoIndex);
+    VectorBuffer& buf = mBuffers.at(di.mVectorIndex);
+    
+    buf.newData = true;
+}
+
 bool BufferedDataTask::addDataInfo(RTT::base::InputPortInterface* reader, int vector_idx, 
                 const std::string& slice) {
 
@@ -29,7 +39,7 @@ bool BufferedDataTask::addDataInfo(RTT::base::InputPortInterface* reader, int ve
 
     mBuffers.at(vector_idx).mDataVectorIndex = vector_idx; 
 
-    if (_debug_buffer.get()) {
+    if ( _debug_buffer.get() && !mBuffers.at(vector_idx).debugOut ) {
 
         std::string idx_str = boost::lexical_cast<std::string>(vector_idx);
         
@@ -119,19 +129,22 @@ void BufferedDataTask::updateHook()
 
     Buffers::iterator it = mBuffers.begin();
     
-    for ( ; it != mBuffers.end(); it++ ) {
+    for ( int i=0; it != mBuffers.end(); it++,i++ ) {
 
         if ( ! it->isCreated() ) {
             const DataVector& dv = getDataVector(it->mDataVectorIndex);
             it->create(dv, _buffer_size.get(), _buffer_time.get());
         }
 
-        if ( it->isCreated() ) {
+        if ( it->isCreated() && 
+                ((_buffer_new_only.get() && it->newData) || !_buffer_new_only.get()) ) {
+
             const DataVector& dv = getDataVector(it->mDataVectorIndex);
             it->push(dv);
+
+            it->newData = false;
             
-            if ( _debug_buffer.get() )
-                it->writeDebug();
+            it->writeDebug();
         }
     }
 
