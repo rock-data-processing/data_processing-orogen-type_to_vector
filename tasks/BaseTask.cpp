@@ -250,13 +250,59 @@ void BaseTask::sampleCallback(base::Time const& timestamp, SampleData const& sam
 bool BaseTask::addComponentToVector(::std::string const & component, 
         ::std::string const & slice, boost::int32_t to_vector)
 {
-    return false;
+    TaskContext* comp = this->getPeer(component);
+
+    if ( !comp ) {
+
+        log(Error) << "no component " << component << " found" << endlog();
+        return false;
+    }
+    
+    typedef RTT::DataFlowInterface::Ports Ports;
+    Ports ports = comp->ports()->getPorts();
+    for (Ports::iterator it = ports.begin(); it != ports.end(); ++ it)
+        addPortToVector( component, (*it)->getName(), slice, to_vector );
+
+    return true;
 }
 
 bool BaseTask::addPortToVector(::std::string const & component, ::std::string const & port, 
         ::std::string const & slice, boost::int32_t to_vector)
 {
-    return false;
+    TaskContext* comp = this->getPeer(component);
+
+    if ( !comp ) {
+
+        log(Error) << "no component " << component << " found" << endlog();
+        return false;
+    }
+
+    RTT::base::OutputPortInterface* writer = 
+        dynamic_cast<RTT::base::OutputPortInterface*>(comp->ports()->getPort(port));
+
+    if ( !writer ) {
+        log(Error) << " component " << component << " does not have an output port " << 
+            port << endlog();
+        return false;
+    }
+
+    std::string portname(component + "." + port);
+    RTT::base::PortInterface *pi = ports()->getPort(portname);
+
+    if ( pi ) {
+        
+        log(Info) << "port " << portname << " already exists" << endlog();
+        return true;
+    }
+
+    RTT::base::InputPortInterface* reader = static_cast<RTT::base::InputPortInterface*>(
+            writer->antiClone());
+
+    reader->setName(portname);
+
+    writer->createConnection(*reader);
+
+    return addDataInfo(reader, to_vector, slice);
 }
 
 bool BaseTask::createInputPort(::std::string const & port_name, 
@@ -294,8 +340,6 @@ bool BaseTask::createInputPort(::std::string const & port_name,
         return false;
     }
     
-    //ports()->addPort(in_port->getName(), *in_port);
-
     return addDataInfo(in_port, to_vector, slice);  
 }
 
