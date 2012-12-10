@@ -56,12 +56,12 @@ namespace general_processing {
         bool getTimeMatrix(int vector_idx, double from_time, double to_time, 
                 base::MatrixXd& time_matrix);
 
+        /** Is the Buffer filled.  */
         bool isFilled(int vector_idx) const;
 
     public:
         /** TaskContext constructor for BufferedDataTask
          * \param name Name of the task. This name needs to be unique to make it identifiable via nameservices.
-         * \param initial_state The initial TaskState of the TaskContext. Default is Stopped state.
          */
         BufferedDataTask(std::string const& name = "general_processing::BufferedDataTask");
 

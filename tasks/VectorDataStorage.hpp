@@ -43,7 +43,8 @@ enum Conversions { DATACONVERSION, TIMECONVERSION };
 
 struct DataInfo;
 
-// Information that belong to the data a port produces
+/** The data of a sample plus additional informations to process the sample..
+ */
 struct SampleData {
 
     VectorOfDoubles mData;
@@ -134,8 +135,8 @@ struct DataVector : public std::vector<SampleData> {
 
 typedef boost::shared_ptr<MatrixBuffer> BufferPointer;
 
-/** Buffering data vectors. */
-struct VectorBuffer {
+/** \brief Buffering data vectors. */
+struct VectorBuffer { 
 
     int mDataVectorIndex;
 

@@ -362,6 +362,14 @@ void BaseTask::getTimeVector(int vector_idx, base::VectorXd& time_vector) const 
 void BaseTask::getExpandedTimeVector(int vector_idx, base::VectorXd& time_vector) const {
     mVectors.at(vector_idx).getExpandedTimeVector(time_vector);
 }
+
+void BaseTask::getPlaces(int vector_idx, StringVector& places) const {
+    mVectors.at(vector_idx).getPlacesVector(places);
+}
+
+bool BaseTask::isFilled(int vector_idx) const {
+    return mVectors.at(vector_idx).isFilled();
+}
     
 
 void BaseTask::clear() {
