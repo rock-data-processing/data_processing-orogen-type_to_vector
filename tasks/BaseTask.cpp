@@ -351,6 +351,14 @@ const DataInfo& BaseTask::getDataInfo(int index) const {
     return mDataInfos.at(index);
 }
 
+int BaseTask::getDataVectorCount() const {
+    return mVectors.size();
+}
+
+int BaseTask::getDataInfoCount() const {
+    return mDataInfos.size();
+}
+
 void BaseTask::getVector(int vector_idx, base::VectorXd& vector) const {
     mVectors.at(vector_idx).getVector(vector);
 }
@@ -406,10 +414,19 @@ void BaseTask::clear() {
 //     return true;
 // }
 
-void BaseTask::updateHook()
-{
-    BaseTaskBase::updateHook();
 
+bool BaseTask::isDataAvailable () const {
+
+    Vectors::const_iterator it = mVectors.begin();
+
+    for ( ; it != mVectors.end(); it++)
+        if ( !it->isFilled() ) return false;
+
+    return true;
+}
+
+void BaseTask::updateData() {
+    
     DataInfos::iterator data_it = mDataInfos.begin();
 
     for ( ; data_it != mDataInfos.end(); data_it++ ) {
@@ -423,6 +440,13 @@ void BaseTask::updateHook()
         for ( ; vector_it != mVectors.end(); vector_it++ )
             vector_it->writeDebug();
     }
+
+}
+
+void BaseTask::updateHook()
+{
+    updateData();
+    if ( isDataAvailable() ) process();
 }
 
 // void BaseTask::errorHook()

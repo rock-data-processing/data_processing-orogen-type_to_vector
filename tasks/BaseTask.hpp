@@ -101,6 +101,10 @@ namespace general_processing {
         const DataVector& getDataVector(int vector_idx) const;
 
         const DataInfo& getDataInfo(int index) const;
+
+        int getDataVectorCount() const;
+
+        int getDataInfoCount() const;
         
         /** Get the vector at vector_idx. */
         void getVector(int vector_idx, base::VectorXd& vector) const;
@@ -119,6 +123,21 @@ namespace general_processing {
          * Means that data from each port contributing to the vector are in the
          * vector. If the data does not change */
         bool isFilled(int vector_idx) const;
+
+        /** Checks whether the data are all there and everything is ready to
+         * start the processing.
+         *
+         * The base implementation is, that all vectors have to be filled once. */
+        virtual bool isDataAvailable() const;
+
+        /** The processing method, that runs the algorithm.
+         *
+         * Implement the algorithm here andd use getVector to get the vectors.*/
+        virtual void process() {}
+
+        /** Fetches the data from the ports, forward them to the stream aligner and
+         * step through the stream aligner. */
+        virtual void updateData();
 
     public:
         /** TaskContext constructor for BaseTask

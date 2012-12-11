@@ -125,20 +125,12 @@
  * \subsection impl Implement the algorithm
  *
  * The setup and initialisation of the algorithm is as usual done in the 
- * \c conigurationHook and/or in the \c startHook. For now the processing must
- * be used in the \c updateHook. But first the updateHook of the base class must
- * be called. Assuming one wants to write an \c AlgorithmTask:
- * \code
- * void updateHook() {
- *    AlgorithmTaskBase::updateHook();
- *
- *    // using the algorithm
- * }
- * \endcode
- *
- * Inside the superclasse's \c updateHook the gathering and conversion of the
- * data is done. The upper is true for both bases (general_processing::BaseTask,
- * general_processing::BufferedDataTask).
+ * \c conigurationHook and/or in the \c startHook. For the processing code
+ * one must overwrite the method general_processing::BaseTask::process().
+ * The task starts to call it when the vectors (for the general_processing::BaseTask) 
+ * or the buffers (for the general_processing::BufferedDataTask) are filled once.
+ * If those criterias to start the processing does not fit, the method
+ * general_processing::BaseTask::isDataAvailable might be reimplemented.
  *
  * \subsection get Getting the data
  *

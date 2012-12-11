@@ -101,7 +101,7 @@ bool BufferedDataTask::getTimeMatrix(int vector_idx, double from_time, double to
     return mBuffers.at(vector_idx).getTimeMatrix(from_time, to_time, dt, time_matrix); 
 }
         
-bool BufferedDataTask::isFilled(int vector_idx) const 
+bool BufferedDataTask::isBufferFilled(int vector_idx) const 
     { return mBuffers.at(vector_idx).isFilled(); }
 
 
@@ -123,10 +123,20 @@ bool BufferedDataTask::isFilled(int vector_idx) const
 //     return true;
 // }
 
-void BufferedDataTask::updateHook()
-{
-    BufferedDataTaskBase::updateHook();
+bool BufferedDataTask::isDataAvailable () const {
 
+    Buffers::const_iterator it = mBuffers.begin();
+
+    for ( ; it != mBuffers.end(); it++)
+        if ( !it->isFilled() ) return false;
+
+    return true;
+}
+
+void BufferedDataTask::updateData() {
+
+    BufferedDataTaskBase::updateData();
+    
     Buffers::iterator it = mBuffers.begin();
     
     for ( int i=0; it != mBuffers.end(); it++,i++ ) {
@@ -147,19 +157,4 @@ void BufferedDataTask::updateHook()
             it->writeDebug();
         }
     }
-
 }
-
-// void BufferedDataTask::errorHook()
-// {
-//     BufferedDataTaskBase::errorHook();
-// }
-// void BufferedDataTask::stopHook()
-// {
-//     BufferedDataTaskBase::stopHook();
-// }
-// void BufferedDataTask::cleanupHook()
-// {
-//     BufferedDataTaskBase::cleanupHook();
-// }
-
