@@ -167,7 +167,7 @@ public:
     bool getTimeMatrix(double from_time, double to_time, double delta_time,
           base::MatrixXd& matrix);
 
-    bool isFilled() const { return mDataBuffer->isFilled(); }
+    bool isFilled() const { return isCreated() && mDataBuffer->isFilled(); }
 
     bool isCreated() const { return mDataBuffer.get(); }
 
