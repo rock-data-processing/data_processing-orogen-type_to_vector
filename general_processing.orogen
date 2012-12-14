@@ -17,10 +17,8 @@ task_context "BaseTask" do
     needs_configuration
 
     dynamic_input_port(/\w+/, nil).
-        needs_reliable_connection. # TODO necessary?
         task_trigger
-
-    dynamic_output_port(/\w+/, nil)
+    dynamic_output_port(/^debug_\d+$/, '/general_processing/ConvertedVector')
     
     operation('loadTypekit').
         returns('bool').
@@ -67,6 +65,8 @@ end
 task_context "BufferedDataTask" do
     subclasses "BaseTask"
 
+    dynamic_output_port(/^debug_buffer_\d+$/, '/general_processing/BufferContent')
+
     doc "In addition to the BaseTask the data are buffered. The size of the incoming "+
         "data must not change."
     
@@ -88,11 +88,6 @@ task_context "BufferedDataTask" do
 
     property("debug_buffer","bool",false).
         doc "if true, a debug output port for the buffer data is created"
-end
-
-typekit do
-    export_types "/general_processing/ConvertedVector"
-    export_types "/general_processing/BufferContent"
 end
 
 deployment "general_processing_test" do
