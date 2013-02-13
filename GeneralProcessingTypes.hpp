@@ -16,7 +16,7 @@
 
 #include <base/eigen.h>
 
-#include <general_processing/Definitions.hpp>
+#include <type_to_vector/Definitions.hpp>
 
 namespace general_processing {
 
@@ -24,7 +24,7 @@ struct ConvertedVector {
 
     base::VectorXd data;
     base::VectorXd time;
-    StringVector places;
+    type_to_vector::StringVector places;
 };
 
 struct BufferContent {

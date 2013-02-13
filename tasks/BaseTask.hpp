@@ -116,7 +116,7 @@ namespace general_processing {
         void getExpandedTimeVector(int vector_idx, base::VectorXd& time_vector) const;
 
         /** Get the places of the vector elements (if stored). */
-        void getPlaces(int vector_idx, StringVector& places) const;
+        void getPlaces(int vector_idx, type_to_vector::StringVector& places) const;
 
         /** Checks if the vector at idx \c vector_idx is filled.
          *

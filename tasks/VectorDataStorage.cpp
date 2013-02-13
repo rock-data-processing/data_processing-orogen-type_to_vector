@@ -9,11 +9,12 @@
 
 #include <aggregator/StreamAligner.hpp>
 
-#include <general_processing/VectorBuilder.hpp>
+#include <type_to_vector/VectorBuilder.hpp>
 
 #include "VectorDataStorage.hpp"
 
 using namespace general_processing;
+using namespace type_to_vector;
 using RTT::log;
 using RTT::endlog;
 using RTT::Info;

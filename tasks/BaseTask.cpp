@@ -7,8 +7,8 @@
 #include <rtt/plugin/PluginLoader.hpp>
 #include <typelib/registry.hh>
 
-#include <general_processing/VectorTocMaker.hpp>
-#include <general_processing/Converter.hpp>
+#include <type_to_vector/VectorTocMaker.hpp>
+#include <type_to_vector/Converter.hpp>
 
 #include <base/eigen.h>
 #include <base/samples/rigid_body_state.h>
@@ -19,6 +19,7 @@
 #include "BaseTask.hpp"
 
 using namespace general_processing;
+using namespace type_to_vector;
 using RTT::log;
 using RTT::endlog;
 using RTT::Debug;

@@ -20,9 +20,9 @@
 
 #include <rtt/typelib/TypelibMarshallerBase.hpp>
 
-#include <general_processing/Definitions.hpp>
-#include <general_processing/VectorBuilder.hpp>
-#include <general_processing/MatrixBuffer.hpp>
+#include <type_to_vector/Definitions.hpp>
+#include <type_to_vector/VectorBuilder.hpp>
+#include <type_to_vector/MatrixBuffer.hpp>
 
 #include "../GeneralProcessingTypes.hpp"
 
@@ -47,9 +47,9 @@ struct DataInfo;
  */
 struct SampleData {
 
-    VectorOfDoubles mData;
+    type_to_vector::VectorOfDoubles mData;
     double mTime;
-    StringVector mPlaces;
+    type_to_vector::StringVector mPlaces;
     
     int mDataInfoIndex;
 };
@@ -65,7 +65,7 @@ struct DataInfo {
 
     RTT::base::InputPortInterface* readPort;
 
-    VectorConversion conversions;
+    type_to_vector::VectorConversion conversions;
 
     bool hasTime; //!< True if the type has a time field.
    
@@ -117,7 +117,7 @@ struct DataVector : public std::vector<SampleData> {
      * false. 
      *
      * \returns true if part of the vector is new data*/
-    void getPlacesVector (StringVector& places_vector) const;
+    void getPlacesVector (type_to_vector::StringVector& places_vector) const;
 
     /** Puts the current available data to the struct data and returns it. */
     ConvertedVector& getConvertedVector (ConvertedVector& data) const;
@@ -133,7 +133,7 @@ struct DataVector : public std::vector<SampleData> {
 };
 
 
-typedef boost::shared_ptr<MatrixBuffer> BufferPointer;
+typedef boost::shared_ptr<type_to_vector::MatrixBuffer> BufferPointer;
 
 /** \brief Buffering data vectors. */
 struct VectorBuffer { 

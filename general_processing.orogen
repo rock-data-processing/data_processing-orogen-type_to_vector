@@ -2,7 +2,7 @@ name "general_processing"
 
 version "0.1"
 
-using_library 'general_processing'
+using_library 'type_to_vector'
 
 import_types_from 'base'
 import_types_from 'GeneralProcessingTypes.hpp'
