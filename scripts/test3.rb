@@ -9,7 +9,7 @@ ENV['ORO_LOGLEVEL'] = '6'
 
 # Testing the debug port creation
 
-Orocos.run 'general_processing_test' do |p|
+Orocos.run 'type_to_vector_test' do |p|
 
     task = TaskContext.get 'TestBaseTask'
 

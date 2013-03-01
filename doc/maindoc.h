@@ -1,4 +1,4 @@
-/** \mainpage General Processing
+/** \mainpage Type To Vector
  *  
  * This package provides basic tasks to enable generic processing components.
  * Generic processing components have an algorithm implemented that works
@@ -8,13 +8,13 @@
  *
  * \tableofcontents
  *
- * \section General Processing Components
+ * \section The Type To Vector Components
  *
  * \subsection intro Introduction
  *
  * This package contains two components as basis for generic data processing tasks:
- *  -# general_processing::BaseTask
- *  -# general_processing::BufferedDataTask
+ *  -# type_to_vector::BaseTask
+ *  -# type_to_vector::BufferedDataTask
  *
  *  Both have an interface to create ports of abritary type and have the data
  *  available inside as vector of doubles. The \c BaseTask provides just the
@@ -33,26 +33,26 @@
  *
  * version "0.1"
  *
- * using_task_library 'general_processing'
+ * using_task_library 'type_to_vector'
  *
  * task_context "Task" do
- *   subclasses 'general_processing::BaseTask'
+ *   subclasses 'type_to_vector::BaseTask'
  *
  *   ...
  * end
  * \endcode
  *
- * Of course the new package must depend on the general_processing package. Add
+ * Of course the new package must depend on the type_to_vector package. Add
  *
  * \code
- * <depend package="virgo/orogen/general_processing"/>
+ * <depend package="virgo/orogen/type_to_vector"/>
  * \endcode
  *
  * to the \e manifest.xml file.
  *
  * \subsection add Adding ports
  *
- * To add ports there is the general_processing::BaseTask::createInputPort operation.
+ * To add ports there is the type_to_vector::BaseTask::createInputPort operation.
  * That will create a port with a specific type and add all neccessary infrastructure
  * to it to have the data available inside the component. For examples see the \e scripts
  * folder of this package. Arguments are:
@@ -71,10 +71,10 @@
  *
  * If the property \c debug_conversion is true, a debug port (debug_<idx>) is created, 
  * that outputs the conversion result. <idx> is the index of the accociated vector. The 
- * port is of type  general_processing::ConvertedVector. For the 
- * general_processing::BufferedDataTask the property \c debug_buffer exists. If true, 
+ * port is of type  type_to_vector::ConvertedVector. For the 
+ * type_to_vector::BufferedDataTask the property \c debug_buffer exists. If true, 
  * another port (debug_buffer_<idx>) is created that will show the buffer content: 
- * general_processing::BufferContent.
+ * type_to_vector::BufferContent.
  *
  * \subsection time Timestamp
  *
@@ -126,11 +126,11 @@
  *
  * The setup and initialisation of the algorithm is as usual done in the 
  * \c conigurationHook and/or in the \c startHook. For the processing code
- * one must overwrite the method general_processing::BaseTask::process().
- * The task starts to call it when the vectors (for the general_processing::BaseTask) 
- * or the buffers (for the general_processing::BufferedDataTask) are filled once.
+ * one must overwrite the method type_to_vector::BaseTask::process().
+ * The task starts to call it when the vectors (for the type_to_vector::BaseTask) 
+ * or the buffers (for the type_to_vector::BufferedDataTask) are filled once.
  * If those criterias to start the processing does not fit, the method
- * general_processing::BaseTask::isDataAvailable might be reimplemented.
+ * type_to_vector::BaseTask::isDataAvailable might be reimplemented.
  *
  * \subsection get Getting the data
  *
@@ -141,26 +141,26 @@
  *  
  *  The latter one is mainly for debugging purposes and will only be created if the 
  *  property \c create_places is true. The methods to get the vectors are:
- *  - general_processing::BaseTask::getVector
- *  - general_processing::BaseTask::getExpandedTimeVector
- *  - general_processing::BaseTask::getPlaces
+ *  - type_to_vector::BaseTask::getVector
+ *  - type_to_vector::BaseTask::getExpandedTimeVector
+ *  - type_to_vector::BaseTask::getPlaces
  *
  *  The methods take a reference to an object as argument to store the data in.
  *
  * \subsection buffer Use the buffer
  *
- * The general_processing::BufferedDataTask stores vectors in a buffer. That allows
+ * The type_to_vector::BufferedDataTask stores vectors in a buffer. That allows
  * to get a vector series of older data. The number of vectors stored is given with
  * the property \c buffer_size. The property \c buffer_time chooses whether to store
  * timestamp informations in a buffer or not.
- * The operation general_processing::BufferedDataTask::setBufferSizeFromTime allows
+ * The operation type_to_vector::BufferedDataTask::setBufferSizeFromTime allows
  * to give time parameters in [s] to determine and set the needed \c buffer_size.
  *
  * To get the date the following methods are available:
- * - general_processing::BufferedDataTask::getDataMatrix(int,int,int,base::MatrixXd&)
- * - general_processing::BufferedDataTask::getDataMatrix(int,double,double,base::MatrixXd&)
- * - general_processing::BufferedDataTask::getTimeMatrix(int,int,int,base::MatrixXd&)
- * - general_processing::BufferedDataTask::getTimeMatrix(int,double,double,base::MatrixXd&)
+ * - type_to_vector::BufferedDataTask::getDataMatrix(int,int,int,base::MatrixXd&)
+ * - type_to_vector::BufferedDataTask::getDataMatrix(int,double,double,base::MatrixXd&)
+ * - type_to_vector::BufferedDataTask::getTimeMatrix(int,int,int,base::MatrixXd&)
+ * - type_to_vector::BufferedDataTask::getTimeMatrix(int,double,double,base::MatrixXd&)
  * 
  * The \e int versions let one give the vectors to get in terms of indices. The
  * \e double versions let one give time values in [s]. The indices are resolved using the

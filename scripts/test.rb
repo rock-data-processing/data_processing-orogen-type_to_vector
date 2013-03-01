@@ -7,7 +7,7 @@ ENV['BASE_LOG_LEVEL'] = 'DEBUG'
 ENV['BASE_LOG_FORMAT'] = 'SHORT'
 ENV['ORO_LOGLEVEL'] = '6'
 
-Orocos.run 'general_processing::BaseTask' => 'task' do |p|
+Orocos.run 'type_to_vector::BaseTask' => 'task' do |p|
     task = TaskContext.get 'task'
 
     Readline.readline "Press enter to create RigidBodyState port." do
