@@ -13,7 +13,6 @@
 
 #include "VectorDataStorage.hpp"
 
-using namespace general_processing;
 using namespace type_to_vector;
 using RTT::log;
 using RTT::endlog;

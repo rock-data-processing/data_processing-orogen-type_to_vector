@@ -13,12 +13,11 @@
 #include <base/eigen.h>
 #include <base/samples/rigid_body_state.h>
 
-#include "../GeneralProcessingTypes.hpp"
+#include "../TypeToVectorTypes.hpp"
 #include "VectorDataStorage.hpp"
 
 #include "BaseTask.hpp"
 
-using namespace general_processing;
 using namespace type_to_vector;
 using RTT::log;
 using RTT::endlog;
@@ -26,7 +25,7 @@ using RTT::Debug;
 using RTT::Info;
 using RTT::Error;
 
-namespace general_processing {
+namespace type_to_vector {
 class TimeNowConversion : public AbstractConverter {
 
 public:
@@ -108,7 +107,7 @@ bool BaseTask::addDebugOutput(DataVector& vector, int vector_idx) {
         std::string idx_str = boost::lexical_cast<std::string>(vector_idx);
 
         vector.debugOut = createOutputPort("debug_"+idx_str,
-            "/general_processing/ConvertedVector");
+            "/type_to_vector/ConvertedVector");
 
         if ( ! vector.debugOut)
             return false;
@@ -208,10 +207,10 @@ bool BaseTask::addDataInfo(RTT::base::InputPortInterface* reader, int vector_idx
     if ( !dv.debugOut && !addDebugOutput(dv, vector_idx) ) 
         return false;
  
-    aggregator::StreamAligner::Stream<general_processing::SampleData>::callback_t cb = 
+    aggregator::StreamAligner::Stream<SampleData>::callback_t cb = 
         boost::bind(&BaseTask::sampleCallback,this,_1,_2);
 
-    di.streamIndex = _stream_aligner.registerStream<general_processing::SampleData>(cb, 
+    di.streamIndex = _stream_aligner.registerStream<SampleData>(cb, 
             0, base::Time());
 
     di.pStreamAligner = &_stream_aligner;
@@ -248,63 +247,6 @@ void BaseTask::sampleCallback(base::Time const& timestamp, SampleData const& sam
    processSample(timestamp, sample);
 }
 
-bool BaseTask::addComponentToVector(::std::string const & component, 
-        ::std::string const & slice, boost::int32_t to_vector)
-{
-    TaskContext* comp = this->getPeer(component);
-
-    if ( !comp ) {
-
-        log(Error) << "no component " << component << " found" << endlog();
-        return false;
-    }
-    
-    typedef RTT::DataFlowInterface::Ports Ports;
-    Ports ports = comp->ports()->getPorts();
-    for (Ports::iterator it = ports.begin(); it != ports.end(); ++ it)
-        addPortToVector( component, (*it)->getName(), slice, to_vector );
-
-    return true;
-}
-
-bool BaseTask::addPortToVector(::std::string const & component, ::std::string const & port, 
-        ::std::string const & slice, boost::int32_t to_vector)
-{
-    TaskContext* comp = this->getPeer(component);
-
-    if ( !comp ) {
-
-        log(Error) << "no component " << component << " found" << endlog();
-        return false;
-    }
-
-    RTT::base::OutputPortInterface* writer = 
-        dynamic_cast<RTT::base::OutputPortInterface*>(comp->ports()->getPort(port));
-
-    if ( !writer ) {
-        log(Error) << " component " << component << " does not have an output port " << 
-            port << endlog();
-        return false;
-    }
-
-    std::string portname(component + "." + port);
-    RTT::base::PortInterface *pi = ports()->getPort(portname);
-
-    if ( pi ) {
-        
-        log(Info) << "port " << portname << " already exists" << endlog();
-        return true;
-    }
-
-    RTT::base::InputPortInterface* reader = static_cast<RTT::base::InputPortInterface*>(
-            writer->antiClone());
-
-    reader->setName(portname);
-
-    writer->createConnection(*reader);
-
-    return addDataInfo(reader, to_vector, slice);
-}
 
 bool BaseTask::createInputPort(::std::string const & port_name, 
                                ::std::string const & type_name, 
@@ -343,6 +285,7 @@ bool BaseTask::createInputPort(::std::string const & port_name,
     
     return addDataInfo(in_port, to_vector, slice);  
 }
+
 
 const DataVector& BaseTask::getDataVector(int vector_idx) const { 
     return mVectors.at(vector_idx); 

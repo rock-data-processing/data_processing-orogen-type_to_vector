@@ -1,11 +1,11 @@
-name "general_processing"
+name "type_to_vector"
 
 version "0.1"
 
 using_library 'type_to_vector'
 
 import_types_from 'base'
-import_types_from 'GeneralProcessingTypes.hpp'
+import_types_from 'TypeToVectorTypes.hpp'
 
 task_context "BaseTask" do
     doc "This task provides a infrastructure for processing data types as a "+
@@ -16,28 +16,13 @@ task_context "BaseTask" do
 
     needs_configuration
 
-    dynamic_input_port(/\w+/, nil).
-        task_trigger
-    dynamic_output_port(/^debug_\d+$/, '/general_processing/ConvertedVector')
+    dynamic_input_port(/\w+/, nil).task_trigger
+
+    dynamic_output_port(/^debug_\d+$/, '/type_to_vector/ConvertedVector')
     
     operation('loadTypekit').
         returns('bool').
         argument('name', 'std/string', 'the name of the typekit that should be loaded')
-
-    operation("addComponentToVector").
-       returns("bool").
-       argument("component", "/std/string", "compoment to receive the ports from").
-       argument("slice", "/std/string", "get a part of the data, is applied to all ports").
-       argument("to_vector", "/int").
-       doc("add all ports of a component")
-   
-    operation("addPortToVector").
-       returns("bool").
-       argument("component", "/std/string", "compoment to receive the data from").
-       argument("port", "/std/string", "component's port to receive the data from").
-       argument("slice", "/std/string", "get only a part of the data").
-       argument("to_vector","/int").
-       doc("add a port of a component")
 
     operation("createInputPort").
         returns("bool").
@@ -65,7 +50,7 @@ end
 task_context "BufferedDataTask" do
     subclasses "BaseTask"
 
-    dynamic_output_port(/^debug_buffer_\d+$/, '/general_processing/BufferContent')
+    dynamic_output_port(/^debug_buffer_\d+$/, '/type_to_vector/BufferContent')
 
     doc "In addition to the BaseTask the data are buffered. The size of the incoming "+
         "data must not change."
@@ -90,11 +75,11 @@ task_context "BufferedDataTask" do
         doc "if true, a debug output port for the buffer data is created"
 end
 
-deployment "general_processing_test" do
+deployment "type_to_vector_test" do
     do_not_install
-    task('TestBaseTask','general_processing::BaseTask').
+    task('TestBaseTask','type_to_vector::BaseTask').
         periodic(0.1)
-    task('TestBufferedTask','general_processing::BufferedDataTask').
+    task('TestBufferedTask','type_to_vector::BufferedDataTask').
         periodic(0.1)
     add_default_logger
 end

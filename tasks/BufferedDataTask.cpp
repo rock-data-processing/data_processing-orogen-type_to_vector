@@ -4,7 +4,7 @@
 
 #include "BufferedDataTask.hpp"
 
-using namespace general_processing;
+using namespace type_to_vector;
 
 BufferedDataTask::BufferedDataTask(std::string const& name)
     : BufferedDataTaskBase(name)
@@ -44,7 +44,7 @@ bool BufferedDataTask::addDataInfo(RTT::base::InputPortInterface* reader, int ve
         std::string idx_str = boost::lexical_cast<std::string>(vector_idx);
         
         mBuffers.at(vector_idx).debugOut = createOutputPort("debug_buffer_"+idx_str,
-            "/general_processing/BufferContent");
+            "/type_to_vector/BufferContent");
     }
     
 }
@@ -104,24 +104,6 @@ bool BufferedDataTask::getTimeMatrix(int vector_idx, double from_time, double to
 bool BufferedDataTask::isBufferFilled(int vector_idx) const 
     { return mBuffers.at(vector_idx).isFilled(); }
 
-
-
-/// The following lines are template definitions for the various state machine
-// hooks defined by Orocos::RTT. See BufferedDataTask.hpp for more detailed
-// documentation about them.
-
-// bool BufferedDataTask::configureHook()
-// {
-//     if (! BufferedDataTaskBase::configureHook())
-//         return false;
-//     return true;
-// }
-// bool BufferedDataTask::startHook()
-// {
-//     if (! BufferedDataTaskBase::startHook())
-//         return false;
-//     return true;
-// }
 
 bool BufferedDataTask::isDataAvailable () const {
 

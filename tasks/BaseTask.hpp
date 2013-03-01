@@ -1,9 +1,9 @@
 /* Generated from orogen/lib/orogen/templates/tasks/Task.hpp */
 
-#ifndef GENERAL_PROCESSING_BASETASK_TASK_HPP
-#define GENERAL_PROCESSING_BASETASK_TASK_HPP
+#ifndef TYPE_TO_VECTOR_BASETASK_TASK_HPP
+#define TYPE_TO_VECTOR_BASETASK_TASK_HPP
 
-#include "general_processing/BaseTaskBase.hpp"
+#include "type_to_vector/BaseTaskBase.hpp"
 
 namespace Typelib {
     class Registry;
@@ -15,7 +15,7 @@ namespace RTT{
     }
 }
       
-namespace general_processing {
+namespace type_to_vector {
     
     struct DataInfo;
     struct DataVector;
@@ -39,7 +39,7 @@ namespace general_processing {
     {
 	friend class BaseTaskBase;
 
-
+        
         typedef std::vector<DataInfo> DataInfos;
         typedef std::vector<DataVector> Vectors;
 
@@ -76,17 +76,6 @@ namespace general_processing {
         
         virtual bool loadTypekit(std::string const& name);
         
-        /** Add all ports of a component to a vector.  */
-        virtual bool addComponentToVector(::std::string const & component, 
-                                          ::std::string const & slice, 
-                                          boost::int32_t to_vector);
-
-        /** Add a port of a componente to a vector. */
-        virtual bool addPortToVector(::std::string const & component, 
-                                     ::std::string const & port, 
-                                     ::std::string const & slice, 
-                                     boost::int32_t to_vector);
-
         /** Creates an input port with a type.
          *
          * \param port_name the name the port should have.
@@ -144,7 +133,7 @@ namespace general_processing {
          * \param name Name of the task. This name needs to be unique to make it 
          *      identifiable via nameservices.
          */
-        BaseTask(std::string const& name = "general_processing::BaseTask");
+        BaseTask(std::string const& name = "type_to_vector::BaseTask");
 
         /** TaskContext constructor for BaseTask 
          * \param name Name of the task. This name needs to be unique to make it 

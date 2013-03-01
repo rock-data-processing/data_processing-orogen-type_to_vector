@@ -1,18 +1,11 @@
 /**
- * \file  DataStorage.hpp
+ * \file  VectorDataStorage.hpp
  *
- * \brief 
- *
- *      German Research Center for Artificial Intelligence\n
- *      Project:
- *
- * \date 21.11.2012
- *
- * \author felix.rehrmann@dfki.de
+ * \brief What is needed for handling the conversion process in the component.
  */
 
-#ifndef GENERAL_PROCESSING_DATASTORAGE_HPP
-#define GENERAL_PROCESSING_DATASTORAGE_HPP
+#ifndef TYPETOVECTOR_VECTORDATASTORAGE_HPP
+#define TYPETOVECTOR_VECTORDATASTORAGE_HPP
 
 #include <boost/shared_ptr.hpp>
 
@@ -24,7 +17,7 @@
 #include <type_to_vector/VectorBuilder.hpp>
 #include <type_to_vector/MatrixBuffer.hpp>
 
-#include "../GeneralProcessingTypes.hpp"
+#include "../TypeToVectorTypes.hpp"
 
 namespace RTT {
     namespace Base {
@@ -37,7 +30,7 @@ namespace aggregator {
     class StreamAligner;
 }
 
-namespace general_processing {
+namespace type_to_vector {
         
 enum Conversions { DATACONVERSION, TIMECONVERSION };
 
@@ -47,9 +40,9 @@ struct DataInfo;
  */
 struct SampleData {
 
-    type_to_vector::VectorOfDoubles mData;
+    VectorOfDoubles mData;
     double mTime;
-    type_to_vector::StringVector mPlaces;
+    StringVector mPlaces;
     
     int mDataInfoIndex;
 };
@@ -65,7 +58,7 @@ struct DataInfo {
 
     RTT::base::InputPortInterface* readPort;
 
-    type_to_vector::VectorConversion conversions;
+    VectorConversion conversions;
 
     bool hasTime; //!< True if the type has a time field.
    
@@ -177,4 +170,4 @@ public:
 };
 
 }
-#endif // GENERAL_PROCESSING_DATASTORAGE_HPP
+#endif // TYPETOVECTOR_VECTORDATASTORAGE_HPP

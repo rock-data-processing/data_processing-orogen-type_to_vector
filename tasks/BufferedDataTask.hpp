@@ -1,11 +1,11 @@
 /* Generated from orogen/lib/orogen/templates/tasks/Task.hpp */
 
-#ifndef GENERAL_PROCESSING_BUFFEREDDATATASK_TASK_HPP
-#define GENERAL_PROCESSING_BUFFEREDDATATASK_TASK_HPP
+#ifndef TYPE_TO_VECTOR_BUFFEREDDATATASK_TASK_HPP
+#define TYPE_TO_VECTOR_BUFFEREDDATATASK_TASK_HPP
 
-#include "general_processing/BufferedDataTaskBase.hpp"
+#include "type_to_vector/BufferedDataTaskBase.hpp"
 
-namespace general_processing {
+namespace type_to_vector {
 
     struct VectorBuffer;
 
@@ -69,7 +69,7 @@ namespace general_processing {
         /** TaskContext constructor for BufferedDataTask
          * \param name Name of the task. This name needs to be unique to make it identifiable via nameservices.
          */
-        BufferedDataTask(std::string const& name = "general_processing::BufferedDataTask");
+        BufferedDataTask(std::string const& name = "type_to_vector::BufferedDataTask");
 
         /** TaskContext constructor for BufferedDataTask 
          * \param name Name of the task. This name needs to be unique to make it identifiable for nameservices. 
