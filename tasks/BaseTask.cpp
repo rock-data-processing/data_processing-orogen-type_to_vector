@@ -204,7 +204,8 @@ bool BaseTask::addDataInfo(RTT::base::InputPortInterface* reader, int vector_idx
 
     DataVector& dv = mVectors.at(vector_idx);
 
-    if ( !dv.debugOut && !addDebugOutput(dv, vector_idx) ) 
+    // create an debug port if there is not already one
+    if ( !dv.debugOut && !addDebugOutput(dv, vector_idx) )
         return false;
  
     aggregator::StreamAligner::Stream<SampleData>::callback_t cb = 

@@ -33,7 +33,8 @@ task_context "BaseTask" do
         doc("creates an input port at runtime and add it to a vector conversion")
 
     property("debug_conversion","/bool",false).
-        doc "create a debug port for a vector and sends the conversion results to it"
+        doc "create a debug port for a vector and sends the conversion results to it "+
+            "(set it before creating ports!)"
 
     property("create_places","/bool",false).
         doc "creates place information during conversion"
@@ -72,7 +73,8 @@ task_context "BufferedDataTask" do
         doc "buffers only new data vs. buffer in every updatHook"
 
     property("debug_buffer","bool",false).
-        doc "if true, a debug output port for the buffer data is created"
+        doc "if true, a debug output port for the buffer data is created "+
+            "(set it before creating ports!)"
 end
 
 deployment "type_to_vector_test" do
