@@ -10,6 +10,6 @@
   <depend package="base/types" />
   <depend package="orogen" />
   <depend package="drivers/orogen/aggregator"/>
-  <depend package="virgo/type_to_vector" />
+  <depend package="data_processing/type_to_vector" />
   <depend package="rtt_typelib" />
 </package>
