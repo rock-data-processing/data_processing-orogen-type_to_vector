@@ -38,15 +38,7 @@ bool BufferedDataTask::addDataInfo(RTT::base::InputPortInterface* reader, int ve
     if ( mBuffers.size() <= vector_idx ) mBuffers.resize(vector_idx+1);
 
     mBuffers.at(vector_idx).mDataVectorIndex = vector_idx; 
-
-    if ( _debug_buffer.get() && !mBuffers.at(vector_idx).debugOut ) {
-
-        std::string idx_str = boost::lexical_cast<std::string>(vector_idx);
-        
-        mBuffers.at(vector_idx).debugOut = createOutputPort("debug_buffer_"+idx_str,
-            "/type_to_vector/BufferContent");
-    }
-    
+ 
 }
 
 void BufferedDataTask::clear() {
@@ -139,4 +131,27 @@ void BufferedDataTask::updateData() {
             it->writeDebug();
         }
     }
+}
+
+bool BufferedDataTask::configureHook() {
+
+    if (!BufferedDataTaskBase::configureHook() )
+        return false;
+
+    // create debug ports for the buffers
+    if ( _debug_buffer.get() ) {
+        
+        Buffers::iterator it = mBuffers.begin();
+        for ( int idx=0; it != mBuffers.end(); it++,idx++) {
+
+            if ( !it->debugOut ) {
+
+                std::string idx_str = boost::lexical_cast<std::string>(idx);
+                it->debugOut = createOutputPort("debug_buffer_" + idx_str, 
+                        "/type_to_vector/BufferContent");
+            }
+        }
+    }
+
+    return true;
 }

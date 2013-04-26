@@ -82,6 +82,8 @@ namespace type_to_vector {
          */
 	~BufferedDataTask();
 
+        bool configureHook();
+
     };
 }
 

@@ -13,12 +13,15 @@ Orocos.run 'type_to_vector::BaseTask' => 'task' do |p|
 
     task = TaskContext.get 'task'
 
-    task.debug_conversion = true
     task.create_places = false
 
     task.createInputPort("rbs1","/base/samples/RigidBodyState","",0)
 
     task.createInputPort("mc2d","/base/MotionCommand2D","",0)
+    
+    
+    task.debug_conversion = true
+    task.configure
 
     puts "Task  Type  Orocos_Type"
     puts "--- Input ports ---"
@@ -34,7 +37,6 @@ Orocos.run 'type_to_vector::BaseTask' => 'task' do |p|
     Readline.readline "Press enter to start task." do
     end
 
-    task.configure
     
     task.start
 

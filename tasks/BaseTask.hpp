@@ -148,6 +148,8 @@ namespace type_to_vector {
          */
 	~BaseTask();
 
+        bool configureHook();
+
         /** During update all new data will be gathered from the input ports, converted
          * to a vector and feed to the stream aligner.
          *

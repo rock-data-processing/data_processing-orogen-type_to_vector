@@ -204,10 +204,6 @@ bool BaseTask::addDataInfo(RTT::base::InputPortInterface* reader, int vector_idx
 
     DataVector& dv = mVectors.at(vector_idx);
 
-    // create an debug port if there is not already one
-    if ( !dv.debugOut && !addDebugOutput(dv, vector_idx) )
-        return false;
- 
     aggregator::StreamAligner::Stream<SampleData>::callback_t cb = 
         boost::bind(&BaseTask::sampleCallback,this,_1,_2);
 
@@ -346,12 +342,7 @@ void BaseTask::clear() {
     mVectors.clear();
 }
 
-// bool BaseTask::configureHook()
-// {
-//     if (! BaseTaskBase::configureHook())
-//         return false;
-//     return true;
-// }
+
 // bool BaseTask::startHook()
 // {
 //     if (! BaseTaskBase::startHook())
@@ -386,6 +377,24 @@ void BaseTask::updateData() {
             vector_it->writeDebug();
     }
 
+}
+
+bool BaseTask::configureHook()
+{
+    if (! BaseTaskBase::configureHook())
+        return false;
+    
+   
+    // check again for debugs ports to create 
+    Vectors::iterator it = mVectors.begin();
+
+    for (int idx = 0; it != mVectors.end(); it++, idx++ ) {
+    
+        if (!it->debugOut && !addDebugOutput(*it, idx))
+            log(Error) << "couldn't create debug output port for vector " << idx << endlog();
+    }
+ 
+    return true;
 }
 
 void BaseTask::updateHook()

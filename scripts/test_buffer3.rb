@@ -17,12 +17,14 @@ Orocos.run 'type_to_vector_test' do |p|
     task.debug_conversion = false
     task.create_places = false
     task.aggregator_max_latency = 0.01
-    task.debug_buffer = true
     task.buffer_time = true
     task.buffer_size = 5
     task.buffer_new_only = true
 
     task.createInputPort("rbs1","/base/samples/RigidBodyState","position orientation",0)
+    
+    task.debug_buffer = true
+    task.configure
 
 
     puts "Task  Type  Orocos_Type"
@@ -42,7 +44,6 @@ Orocos.run 'type_to_vector_test' do |p|
     Readline.readline "Press enter to start task." do
     end
 
-    task.configure
     task.start
     
     rbs = w_rbs.new_sample

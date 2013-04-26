@@ -76,9 +76,6 @@
  * another port (debug_buffer_<idx>) is created that will show the buffer content: 
  * type_to_vector::BufferContent.
  *
- * \note
- * Set the debug flags before creating ports.
- *
  * \subsection time Timestamp
  *
  * For each port the time stamp is create from an appropiate field of the type, that
