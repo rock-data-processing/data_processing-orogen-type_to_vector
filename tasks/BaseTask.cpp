@@ -106,7 +106,6 @@ bool BaseTask::addInputPortDataHandling(DataInfo& di) {
         return false;
     }
 
-    ports()->addEventPort(di.readPort->getName(), *(di.readPort) ); 
    
     di.typelibMarshaller = transport;
     di.handle = di.typelibMarshaller->createSample();
@@ -227,6 +226,8 @@ RTT::base::InputPortInterface* BaseTask::createInputPort(
         return 0;
     }
     
+    ports()->addEventPort(in_port->getName(), *(in_port) ); 
+    
     return in_port;
 }
 
@@ -238,8 +239,10 @@ bool BaseTask::createDataInfo(const PortConfig& config) {
     DataInfo di;
     
     di.readPort = createInputPort(config.portname, config.type);
+    di.rawPort = static_cast<RTT::InputPort<base::VectorXd>*>(
+            createInputPort(config.portname+"_raw", "/base/VectorXd") );
 
-    if ( !di.readPort ) return false;
+    if ( !di.readPort || !di.rawPort ) return false;
     
     if ( !addInputPortDataHandling(di) ) return false;
     

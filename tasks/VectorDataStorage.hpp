@@ -10,6 +10,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include <rtt/base/DataSourceBase.hpp>
+#include <rtt/InputPort.hpp>
 
 #include <rtt/typelib/TypelibMarshallerBase.hpp>
 
@@ -23,7 +24,6 @@
 
 namespace RTT {
     namespace Base {
-        class InputPortInterface;
         class OutputPortInterface;
     }
 }
@@ -38,8 +38,7 @@ enum Conversions { DATACONVERSION, TIMECONVERSION };
 
 struct DataInfo;
 
-/** The data of a sample plus additional informations to process the sample..
- */
+/** The data of a sample plus additional informations to process the sample. */
 struct SampleData {
 
     VectorOfDoubles mData;
@@ -58,12 +57,14 @@ struct DataInfo {
     orogen_transports::TypelibMarshallerBase::Handle* handle;
     RTT::base::DataSourceBase::shared_ptr sample;
 
-    RTT::base::InputPortInterface* readPort;
+    RTT::base::InputPortInterface* readPort; 
+    RTT::InputPort<base::VectorXd>* rawPort; //!< Allows to feed raw vectors in.
 
     VectorConversion conversions;
 
     bool hasTime; //!< True if the type has a time field.
     base::Time period; //!< Sample rate (0 if unknown or not periodic).
+    unsigned int sampleCounter;
    
     int streamIndex; //!< Index of stream in the streamAligner.
     aggregator::StreamAligner* pStreamAligner;
@@ -73,6 +74,7 @@ struct DataInfo {
     int mVectorIndex; //!< Vector to put the data in. 
     int mSampleVectorIndex;
 
+    /** Fetches data from the port, convert it and add it to the appropiate stream.*/
     bool update(bool create_places=false);
 };
 

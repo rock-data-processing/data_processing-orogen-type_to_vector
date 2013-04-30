@@ -50,7 +50,24 @@ bool DataInfo::update(bool create_places) {
         pStreamAligner->push(streamIndex, t, newSample);
 
         return true;
-    }  
+    } else {
+        
+        base::VectorXd raw_vector;
+        if ( rawPort->read(raw_vector) != RTT::NewData ) return false;
+
+        base::Time t = base::Time::now();
+
+        newSample.mData.resize(raw_vector.rows());
+        Eigen::Map<base::VectorXd> vec_map(&(newSample.mData[0]), raw_vector.rows());
+        vec_map = raw_vector;
+
+        newSample.mPlaces.clear();
+        newSample.mTime = t.toSeconds();
+        
+        pStreamAligner->push(streamIndex, t, newSample);
+
+        return true;
+    } 
     return false;
 }
     
