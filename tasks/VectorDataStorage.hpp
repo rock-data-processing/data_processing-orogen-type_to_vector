@@ -13,6 +13,8 @@
 
 #include <rtt/typelib/TypelibMarshallerBase.hpp>
 
+#include <base/time.h>
+
 #include <type_to_vector/Definitions.hpp>
 #include <type_to_vector/VectorBuilder.hpp>
 #include <type_to_vector/MatrixBuffer.hpp>
@@ -61,6 +63,7 @@ struct DataInfo {
     VectorConversion conversions;
 
     bool hasTime; //!< True if the type has a time field.
+    base::Time period; //!< Sample rate (0 if unknown or not periodic).
    
     int streamIndex; //!< Index of stream in the streamAligner.
     aggregator::StreamAligner* pStreamAligner;

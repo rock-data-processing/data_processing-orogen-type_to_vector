@@ -30,15 +30,16 @@ void BufferedDataTask::processSample(base::Time const& timestamp, SampleData con
     buf.newData = true;
 }
 
-bool BufferedDataTask::addDataInfo(RTT::base::InputPortInterface* reader, int vector_idx, 
-                const std::string& slice) {
+bool BufferedDataTask::createDataInfo(const PortConfig& config) {
 
-    BaseTask::addDataInfo(reader, vector_idx, slice);
+    if (!BaseTask::createDataInfo(config))
+        return false;
     
-    if ( mBuffers.size() <= vector_idx ) mBuffers.resize(vector_idx+1);
+    if ( mBuffers.size() <= config.vectorIdx ) mBuffers.resize(config.vectorIdx+1);
 
-    mBuffers.at(vector_idx).mDataVectorIndex = vector_idx; 
- 
+    mBuffers.at(config.vectorIdx).mDataVectorIndex = config.vectorIdx;
+
+    return true; 
 }
 
 void BufferedDataTask::clear() {
