@@ -11,32 +11,29 @@ ENV['ORO_LOGLEVEL'] = '6'
 
 #Orocos.run 'type_to_vector_test', 'valgrind' => true do |p|
 Orocos.run 'type_to_vector_test' do |p|
-
+    
     task = TaskContext.get 'TestBufferedTask'
 
-    task.debug_conversion = false
-    task.create_places = false
-    task.aggregator_max_latency = 0.01
-    task.buffer_time = true
-    task.buffer_size = 5
-    task.buffer_new_only = true
+    puts "--- Test port creation for buffered task ---"
 
-    task.createInputPort("rbs1","/base/samples/RigidBodyState","position orientation",0)
-    
+    task.debug_conversion = true
     task.debug_buffer = true
-    task.configure
+    task.buffer_size = 3
+    task.buffer_time = true
 
-
-    puts "Task  Type  Orocos_Type"
-    puts "--- Input ports ---"
-    task.each_input_port do |p|
-        puts "#{p.name}  #{p.type_name}  #{p.orocos_type_name}"
-    end
+    puts "- add port rbs1 of type /base/samples/RigidBodyState"
+    puts "  data are added to vextorIdx 0"
     
-    puts "\n--- Output ports ---"
-    task.each_output_port do |p|
-        puts "#{p.name}  #{p.type_name}  #{p.orocos_type_name}"
-    end
+    rbs1_p = Types::TypeToVector::PortConfig.new
+    rbs1_p.portname = "rbs1"
+    rbs1_p.type = "/base/samples/RigidBodyState"
+    rbs1_p.slice = "position orientation"
+
+    task.addPort(rbs1_p)
+
+    puts "- ports are created in the configureHook"
+    
+    task.configure
 
     w_rbs = task.rbs1.writer
     r_b0 = task.debug_buffer_0.reader
@@ -56,7 +53,7 @@ Orocos.run 'type_to_vector_test' do |p|
         rbs.time = Time.now
         w_rbs.write(rbs)
 
-        sleep 0.2
+        sleep 0.1
 
         if cv = r_b0.read()
             puts "--- debug buffer 0 ---"

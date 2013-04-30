@@ -14,14 +14,26 @@ Orocos.run 'type_to_vector_test' do |p|
 
     task = TaskContext.get 'TestBufferedTask'
 
-    task.debug_conversion = false
-    task.create_places = false
-    task.aggregator_max_latency = 0.01
+    puts "--- Test port creation for buffered task ---"
+
+    task.debug_conversion = true
     task.debug_buffer = true
 
-    task.createInputPort("rbs1","/base/samples/RigidBodyState","position orientation",0)
+    puts "- add port rbs1 of type /base/samples/RigidBodyState"
+    puts "  data are added to vextorIdx 0"
+    
+    rbs1_p = Types::TypeToVector::PortConfig.new
+    rbs1_p.portname = "rbs1"
+    rbs1_p.type = "/base/samples/RigidBodyState"
+    rbs1_p.slice = "position orientation"
 
+    task.addPort(rbs1_p)
 
+    puts "- ports are created in the configureHook"
+    
+    task.configure
+
+    puts
     puts "Task  Type  Orocos_Type"
     puts "--- Input ports ---"
     task.each_input_port do |p|
@@ -32,14 +44,9 @@ Orocos.run 'type_to_vector_test' do |p|
     task.each_output_port do |p|
         puts "#{p.name}  #{p.type_name}  #{p.orocos_type_name}"
     end
+    puts
 
-    Readline.readline "Press enter to start task." do
+    Readline.readline "Press enter to quit." do
     end
 
-    task.configure
-    task.start
-
-    sleep(1.0)
-    
 end
-

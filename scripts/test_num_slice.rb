@@ -11,22 +11,46 @@ ENV['ORO_LOGLEVEL'] = '6'
 
 #Orocos.run 'type_to_vector_test', 'valgrind' => true do |p|
 Orocos.run 'type_to_vector_test' do |p|
-
+    
     task = TaskContext.get 'TestBaseTask'
+    
+    puts "--- Test a numerical slice ---"
 
     task.debug_conversion = true
     task.create_places = true
-    task.aggregator_max_latency = 0.01
 
-    task.createInputPort("rbs1","/base/samples/RigidBodyState","position orientation",0)
+    rbs1_p = Types::TypeToVector::PortConfig.new
+    rbs1_p.portname = "rbs1"
+    rbs1_p.type = "/base/samples/RigidBodyState"
+    rbs1_p.slice = "position orientation"
 
-    task.createInputPort("mc2d","/base/MotionCommand2D","",0)
+    task.addPort(rbs1_p)
 
-    task.createInputPort("rbs2","/base/samples/RigidBodyState","orientation",2)
+    mc2d_p = Types::TypeToVector::PortConfig.new
+    mc2d_p.portname = "mc2d"
+    mc2d_p.type = "/base/MotionCommand2D"
+
+    task.addPort(mc2d_p)
+
+    rbs2_p = Types::TypeToVector::PortConfig.new
+    rbs2_p.portname = "rbs2"
+    rbs2_p.type = "/base/samples/RigidBodyState"
+    rbs2_p.slice = "orientation"
+    rbs2_p.vectorIdx = 2
     
-    task.createInputPort("laser1","/base/samples/LaserScan",
-                         "minRange maxRange ranges.[1-100:20]",2)
+    task.addPort(rbs2_p)
 
+    laser1_p = Types::TypeToVector::PortConfig.new
+    laser1_p.portname = "laser1"
+    laser1_p.type = "/base/samples/LaserScan"
+    laser1_p.slice = "minRange maxRange ranges.[1-100:20]"
+    laser1_p.vectorIdx = 2
+   
+    task.addPort(laser1_p)
+    
+    task.configure
+
+    puts
     puts "Task  Type  Orocos_Type"
     puts "--- Input ports ---"
     task.each_input_port do |p|
@@ -37,6 +61,7 @@ Orocos.run 'type_to_vector_test' do |p|
     task.each_output_port do |p|
         puts "#{p.name}  #{p.type_name}  #{p.orocos_type_name}"
     end
+    puts
 
     w_rbs = task.rbs1.writer
     w_mc2d = task.mc2d.writer
@@ -48,7 +73,6 @@ Orocos.run 'type_to_vector_test' do |p|
     Readline.readline "Press enter to start task." do
     end
 
-    task.configure
     task.start
 
     rbs = w_rbs.new_sample
@@ -79,10 +103,17 @@ Orocos.run 'type_to_vector_test' do |p|
     rbs2.angular_velocity = Eigen::Vector3.new(10.0,20.0,30.0)
     rbs2.cov_angular_velocity.data = [0.7,0.0,0.0,0.0,0.7,0.0,0.0,0.0,0.7]
 
-    w_rbs.write(rbs)
-    w_ls1.write(ls1)
-    w_mc2d.write(mc2d)
-    w_rbs2.write(rbs2)
+    stop_t = false
+
+    write_t = Thread.new do
+        while !stop_t
+            w_rbs.write(rbs)
+            w_ls1.write(ls1)
+            w_mc2d.write(mc2d)
+            w_rbs2.write(rbs2)
+            sleep(0.1)
+        end
+    end
 
     Readline.readline "Press enter to read data" do
     end
@@ -106,6 +137,9 @@ Orocos.run 'type_to_vector_test' do |p|
         puts "places:"
         pp cv.places
     end
+
+    stop_t = true
+    write_t.join
 
     Readline.readline "Press enter to quit" do
     end
