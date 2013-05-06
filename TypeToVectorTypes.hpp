@@ -17,9 +17,16 @@ struct PortConfig {
     std::string type; //!< Name of the type the port should handle.
     std::string slice; //!< Gives the part of a type that should be used in a vector.
     int vectorIdx; //!< The vector to add the port's data to.
-    base::Time period; //!< Sample rate (0 if unknown or not periodic).
+    double period; //!< Sample rate in seconds. (0 if unknown or not periodic).
+    bool useTimeNow; //!< Use time now to stamp unstamped data.
 
-    PortConfig() : vectorIdx(0), period(base::Time()) {}
+    PortConfig() :
+        portname(""),
+        type(""),
+        slice(""),
+        vectorIdx(0),
+        period(0.0),
+        useTimeNow(true) {}
 
 };
 

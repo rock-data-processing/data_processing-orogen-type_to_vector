@@ -64,6 +64,9 @@ struct DataInfo {
 
     bool hasTime; //!< True if the type has a time field.
     base::Time period; //!< Sample rate (0 if unknown or not periodic).
+    base::Time start; //!< When to start with the time stamping.
+    base::Time delta; //!< delta time for time stamping with tref
+    bool useTimeNow; //!< set to true if base::Time::now() should be used for stamping.
     unsigned int sampleCounter;
    
     int streamIndex; //!< Index of stream in the streamAligner.

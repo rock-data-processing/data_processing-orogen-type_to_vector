@@ -258,7 +258,9 @@ bool BaseTask::createDataInfo(const PortConfig& config) {
         boost::bind(&BaseTask::sampleCallback,this,_1,_2);
 
     di.streamIndex = _stream_aligner.registerStream<SampleData>(cb, 
-            0, config.period);
+            0, base::Time::fromSeconds(config.period));
+    di.period = base::Time::fromSeconds(config.period);
+    di.useTimeNow = config.useTimeNow;
 
     di.pStreamAligner = &_stream_aligner;
      
@@ -355,15 +357,6 @@ void BaseTask::clear() {
     mDataPorts.clear();
 }
 
-
-// bool BaseTask::startHook()
-// {
-//     if (! BaseTaskBase::startHook())
-//         return false;
-//     return true;
-// }
-
-
 bool BaseTask::isDataAvailable () const {
 
     Vectors::const_iterator it = mVectors.begin();
@@ -402,7 +395,7 @@ bool BaseTask::configureHook()
     for ( ; dit != mDataPorts.end(); dit++ ) {
 
         if ( !createDataInfo(*dit) ) {
-            log(Error) << " couldn't create " << dit->portname << endlog();
+            log(Error) << "couldn't create port " << dit->portname << endlog();
             return false;
         }
     }    
@@ -413,7 +406,26 @@ bool BaseTask::configureHook()
         if (!it->debugOut && !addDebugOutput(*it, idx))
             log(Warning) << "couldn't create debug output port for vector " << idx << endlog();
     }
- 
+
+    return true;
+}
+
+bool BaseTask::startHook() {
+
+    base::Time t_now = base::Time::now();
+    base::Time delta_time = t_now - _start_time.get();
+
+    log(Info) << "started at time " << t_now.toString() << " with a delta= " <<
+        delta_time.toSeconds() << endlog();
+    
+    DataInfos::iterator it = mDataInfos.begin();
+
+    for (; it != mDataInfos.end(); it++) {
+
+        it->start = _start_time.get();
+        it->delta = delta_time;
+    }
+
     return true;
 }
 

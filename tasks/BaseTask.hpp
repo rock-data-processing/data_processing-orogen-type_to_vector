@@ -153,6 +153,8 @@ namespace type_to_vector {
 
         bool configureHook();
 
+        bool startHook();
+
         /** During update all new data will be gathered from the input ports, converted
          * to a vector and feed to the stream aligner.
          *
