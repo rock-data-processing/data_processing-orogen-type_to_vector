@@ -52,14 +52,18 @@
  *
  * \subsection add Adding ports
  *
- * To add ports there is the type_to_vector::BaseTask::createInputPort operation.
- * That will create a port with a specific type and add all neccessary infrastructure
- * to it to have the data available inside the component. For examples see the \e scripts
- * folder of this package. Arguments are:
- *  - \c port_name
- *  - \c type_name name of the port's type
- *  - \c slice see \ref slice
- *  - \c to_vector index of the vector to add the port's data to
+ * Port to be created are described with type_to_vector::PortConfig. It contains
+ *  - \c portname
+ *  - \c type
+ *  - \c slice
+ *  - \c vectorIdx
+ *  - \c period
+ *  - \c useTimeNow
+ * 
+ * Add a description for all ports with the addPort operation. This adds it to a list
+ * which is processed during configuration and all ports are created then. It is 
+ * recommended to add all ports before configuring the task. For examples see the
+ * \e script folder of this package.
  *
  * \note
  * The type used for conversion might not directly be the type specified. In case
@@ -81,8 +85,13 @@
  * For each port the time stamp is create from an appropiate field of the type, that
  * itself has the type base::Time. Normally the name is assumed to be "time". The
  * property \c time_fields allows to give the names of timestamp fields. The first field 
- * in a type with an matching name is taken as timestamp. If there is no timestamp, the
- * current time at vector conversion is the time stamp.
+ * in a type with an matching name is taken as timestamp. 
+ *
+ * If there is no timestamp, the time stamp can be set in three different ways:
+ *  -# if useTimeNow is set, base::Time::now() is used for time stamping,
+ *  -# else if period is set the time stamp is start time + sample count * period or
+ *  -# it is start time + time since calling the startHook.
+ * The reference time is set with the proeprty \c start_time.
  *
  * \subsubsection slice Defining slices
  *
@@ -173,6 +182,13 @@
  *
  * Negative numbers are allowed for \c from and \c to. Then they are meant from the end:
  * index = n - neg_index.
+ *
+ * \subsection rawport Use the raw input port
+ *
+ * For each port an additional input port is created that take base::VectorXd data. This
+ * port can be used to directly feed vectorized data into the component. If there are
+ * no data on the typed port the raw port is checked. Raw data have the same options for
+ * time stamping as listed above for not time stamped data.
  * 
  */
 
