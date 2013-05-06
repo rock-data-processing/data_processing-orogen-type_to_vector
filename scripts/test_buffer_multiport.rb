@@ -23,12 +23,21 @@ Orocos.run 'type_to_vector_test' do |p|
     rbs1_p.portname = "rbs1"
     rbs1_p.type = "/base/samples/RigidBodyState"
     rbs1_p.slice = "position orientation"
+    rbs1_p.vectorIdx = 0
+    rbs1_p.period = 0.0
+    rbs1_p.useTimeNow = false
     
     task.addPort(rbs1_p)
 
     mc2d_p = Types::TypeToVector::PortConfig.new
     mc2d_p.portname = "mc2d"
     mc2d_p.type = "/base/MotionCommand2D"
+    mc2d_p.slice = ""
+    mc2d_p.vectorIdx = 1
+    mc2d_p.period = 0.1
+    mc2d_p.useTimeNow = true
+
+    puts mc2d_p.vectorIdx
 
     task.addPort(mc2d_p)
     
@@ -37,6 +46,8 @@ Orocos.run 'type_to_vector_test' do |p|
     rbs2_p.type = "/base/samples/RigidBodyState"
     rbs2_p.slice = "orientation"
     rbs2_p.vectorIdx = 1
+    rbs2_p.period = 0.0
+    rbs2_p.useTimeNow = false
 
     task.addPort(rbs2_p)
     

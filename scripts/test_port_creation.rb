@@ -24,7 +24,8 @@ Orocos.run 'type_to_vector::BaseTask' => 'task' do |p|
     pc1.portname = "rbs1"
     pc1.type = "/base/samples/RigidBodyState"
     pc1.vectorIdx = 0
-    pc1.period = Time.new(0)
+    pc1.period = 0.0
+    pc1.useTimeNow = false
 
     task.addPort(pc1)
     
@@ -34,7 +35,8 @@ Orocos.run 'type_to_vector::BaseTask' => 'task' do |p|
     pc2.portname = "mc2d"
     pc2.type = "/base/MotionCommand2D"
     pc2.vectorIdx = 0
-    pc2.period = Time.new(0)
+    pc2.period = 0.0
+    pc2.useTimeNow = false
     
     task.addPort(pc2)
 

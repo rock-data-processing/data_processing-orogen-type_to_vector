@@ -26,6 +26,9 @@ Orocos.run 'type_to_vector_test' do |p|
     rbs1_p.portname = "rbs1"
     rbs1_p.type = "/base/samples/RigidBodyState"
     rbs1_p.slice = "position orientation"
+    rbs1_p.vectorIdx = 0
+    rbs1_p.period = 0.1
+    rbs1_p.useTimeNow = true
 
     task.addPort(rbs1_p)
 

@@ -21,12 +21,16 @@ Orocos.run 'type_to_vector_test' do |p|
     rbs1_p.portname = "rbs1"
     rbs1_p.type = "/base/samples/RigidBodyState"
     rbs1_p.slice = "position"
+    rbs1_p.vectorIdx = 0
 
     task.addPort(rbs1_p)
 
     mc2d_p = Types::TypeToVector::PortConfig.new
     mc2d_p.portname = "mc2d"
     mc2d_p.type = "/base/MotionCommand2D"
+    mc2d_p.vectorIdx = 0
+    mc2d_p.period = 0.0
+    mc2d_p.useTimeNow = true
 
     task.addPort(mc2d_p)
 
@@ -35,6 +39,7 @@ Orocos.run 'type_to_vector_test' do |p|
     rbs2_p.type = "/base/samples/RigidBodyState"
     rbs2_p.slice = "position orientation"
     rbs2_p.vectorIdx = 2
+    rbs2_p.period = 0.0
     
     task.addPort(rbs2_p)
 
@@ -43,9 +48,10 @@ Orocos.run 'type_to_vector_test' do |p|
     laser1_p.type = "/base/samples/LaserScan"
     laser1_p.slice = "minRange maxRange"
     laser1_p.vectorIdx = 2
-   
-    task.addPort(laser1_p)
+    laser1_p.period = 0.0
     
+    task.addPort(laser1_p)
+
     task.configure
 
     puts
