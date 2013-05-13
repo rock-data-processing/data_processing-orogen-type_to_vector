@@ -39,6 +39,8 @@ namespace type_to_vector {
     {
 	friend class BaseTaskBase;
 
+        static const int MAX_VECTOR_INDEX;
+
         
         typedef std::vector<DataInfo> DataInfos;
         typedef std::vector<DataVector> Vectors;

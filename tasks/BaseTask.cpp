@@ -42,6 +42,8 @@ public:
 };
 }
 
+const int BaseTask::MAX_VECTOR_INDEX = 100;
+
 BaseTask::BaseTask(std::string const& name)
     : BaseTaskBase(name), mpRegistry(new Typelib::Registry())
 {
@@ -65,6 +67,9 @@ bool BaseTask::loadTypekit(std::string const& name)
 
 void BaseTask::addPort(::type_to_vector::PortConfig const & port_config)
 {
+    if ( port_config.vectorIdx < 0 || port_config.vectorIdx >= MAX_VECTOR_INDEX )
+        throw std::out_of_range("vectorIdx for " + port_config.portname + " is out of range");
+
     mDataPorts.push_back(port_config);
 }
 
