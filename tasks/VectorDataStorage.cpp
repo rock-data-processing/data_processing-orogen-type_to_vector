@@ -38,7 +38,14 @@ bool DataInfo::update(bool create_places) {
             t = *(reinterpret_cast<base::Time*>( data_ptr + 
                         conversions.getToc(TIMECONVERSION).front().position) );
         } else {
-            t = base::Time::now();
+
+            if ( useTimeNow )
+               t = base::Time::now();
+            else if ( period.microseconds )
+                t = start + base::Time::fromSeconds(period.toSeconds() * sampleCounter);
+            else
+                t = base::Time::now() - delta;
+
             newSample.mTime = t.toSeconds();
         } 
         
@@ -49,8 +56,39 @@ bool DataInfo::update(bool create_places) {
 
         pStreamAligner->push(streamIndex, t, newSample);
 
+        sampleCounter++;
+
         return true;
-    }  
+    } else {
+        
+        base::VectorXd raw_vector;
+        if ( rawPort->read(raw_vector) != RTT::NewData ) return false;
+
+        newSample.mData.resize(raw_vector.rows());
+        if ( raw_vector.rows() > 0 ) {
+            Eigen::Map<base::VectorXd> vec_map(&(newSample.mData[0]), raw_vector.rows());
+            vec_map = raw_vector;
+        }
+
+        newSample.mPlaces.clear();
+
+        base::Time t;
+
+        if ( useTimeNow )
+           t = base::Time::now();
+        else if ( period.microseconds )
+            t = start + base::Time::fromSeconds(period.toSeconds() * sampleCounter);
+        else
+            t = base::Time::now() - delta;
+
+        newSample.mTime = t.toSeconds();
+
+        pStreamAligner->push(streamIndex, t, newSample);
+
+        sampleCounter++;
+
+        return true;
+    } 
     return false;
 }
     

@@ -47,11 +47,15 @@ namespace type_to_vector {
         DataInfos mDataInfos;
         Vectors mVectors;
 
+        typedef std::vector<PortConfig> DataPorts;
+
+        DataPorts mDataPorts;
+
         /** Add ports for debug output. */
         bool addDebugOutput(DataVector& vector, int vector_idx);
        
-        /** Adds an input port to data infos. */ 
-        bool addInputPort(DataInfo& di, RTT::base::InputPortInterface* reader);
+        /** Adds an input port to data infos, especially the data handling. */ 
+        bool addInputPortDataHandling(DataInfo& di);
 
         /** Adds the converters to the data info. */
         void addConvertersToInfo(DataInfo& di, const std::string& slice);
@@ -60,32 +64,31 @@ namespace type_to_vector {
         void sampleCallback(base::Time const& timestamp, SampleData const& sample);
 
     protected:
+        /** Load a typekit so its types are known inside the component.*/
+        virtual bool loadTypekit(std::string const& name);
         
+        /** Add a port whose data become part of a vector. */
+        virtual void addPort(::type_to_vector::PortConfig const & port_config);
+       
+
         /** Processing a sample is called by sampleCallback. */
         virtual void processSample(base::Time const& timestamp, SampleData const& sample);
         
         /** Creates an ouptput port. */
         RTT::base::OutputPortInterface* createOutputPort(const std::string& port_name,
-                const std::string& type_name);    
+            const std::string& type_name);    
+        
+        /** Creates an input port. */
+        RTT::base::InputPortInterface* createInputPort(::std::string const & port_name, 
+            ::std::string const & type_name );
 
         /** Adds data conversion informations. */ 
-        virtual bool addDataInfo(RTT::base::InputPortInterface* reader, int vector_idx, 
-                const std::string& slice);
-        
+        virtual bool createDataInfo(const PortConfig& config);
+       
+        /** Clear eveyrhint including removing all input ports. */ 
         virtual void clear();
         
-        virtual bool loadTypekit(std::string const& name);
         
-        /** Creates an input port with a type.
-         *
-         * \param port_name the name the port should have.
-         * \param type_name name of the type the port should be of.
-         * \param slice describes the part of the type which should be used.
-         * \param to_vector number of the vector the data should be added to. */
-        virtual bool createInputPort(::std::string const & port_name, 
-                                     ::std::string const & type_name, 
-                                     ::std::string const & slice, 
-                                     boost::int32_t to_vector);
 
         const DataVector& getDataVector(int vector_idx) const;
 
@@ -121,7 +124,7 @@ namespace type_to_vector {
 
         /** The processing method, that runs the algorithm.
          *
-         * Implement the algorithm here andd use getVector to get the vectors.*/
+         * Implement the algorithm here and use getVector to get the vectors.*/
         virtual void process() {}
 
         /** Fetches the data from the ports, forward them to the stream aligner and
@@ -149,6 +152,8 @@ namespace type_to_vector {
 	~BaseTask();
 
         bool configureHook();
+
+        bool startHook();
 
         /** During update all new data will be gathered from the input ports, converted
          * to a vector and feed to the stream aligner.

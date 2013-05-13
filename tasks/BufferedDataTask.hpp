@@ -25,8 +25,7 @@ namespace type_to_vector {
         virtual void processSample(base::Time const& timestamp, SampleData const& sample);
         
         /** Adds data conversion informations. */ 
-        virtual bool addDataInfo(RTT::base::InputPortInterface* reader, int vector_idx, 
-                const std::string& slice);
+        virtual bool createDataInfo(const PortConfig& config);
         
         virtual void clear();
 

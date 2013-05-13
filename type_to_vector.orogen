@@ -24,13 +24,9 @@ task_context "BaseTask" do
         returns('bool').
         argument('name', 'std/string', 'the name of the typekit that should be loaded')
 
-    operation("createInputPort").
-        returns("bool").
-        argument("port_name", "/std/string", "the name of the port to be created").
-        argument("type_name", "/std/string", "the name of the type the port should handle").
-        argument("slice", "/std/string", "describes the part of the type to be converted").
-        argument("to_vector", "/int", "index of the vector it should be added to").
-        doc("creates an input port at runtime and add it to a vector conversion")
+    operation("addPort").
+        argument("port_config", "/type_to_vector/PortConfig", "config for creation of the port").
+        doc("adds Port for creation in the configureHook")
 
     property("debug_conversion","/bool",false).
         doc "create a debug port for a vector and sends the conversion results to it "
@@ -40,6 +36,9 @@ task_context "BaseTask" do
     
     property("time_fields","/std/string","time").
         doc "space seperated list of valid timestamp fields"
+
+    property("start_time","/base/Time").
+        doc "reference time to be used for not time stamped data"
 
     stream_aligner do
         max_latency 0.1

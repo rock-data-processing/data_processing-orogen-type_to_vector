@@ -23,6 +23,7 @@ using RTT::log;
 using RTT::endlog;
 using RTT::Debug;
 using RTT::Info;
+using RTT::Warning;
 using RTT::Error;
 
 namespace type_to_vector {
@@ -62,42 +63,9 @@ bool BaseTask::loadTypekit(std::string const& name)
     return RTT::plugin::PluginLoader::Instance()->loadLibrary(name);
 }
 
-RTT::base::OutputPortInterface* BaseTask::createOutputPort(const std::string& port_name,
-        const std::string& type_name) {
-    
-    RTT::base::PortInterface *pi = ports()->getPort(port_name);
-    if(pi)
-    {
-        // Port exists. Should not be there already.
-        log(Info) << "Port " << port_name << " is already registered." << endlog();
-        return 0;
-    }
-
-    /* Check if port type is known */
-    RTT::types::TypeInfoRepository::shared_ptr ti = 
-        RTT::types::TypeInfoRepository::Instance();
-    RTT::types::TypeInfo* type = ti->type(type_name);
-    if (!type)
-    {
-    	log(Error) << "Cannot find port type " << type_name << 
-            " in the type info repository." << endlog();
-	
-        return 0;
-    }
-    
-    /* Add output port */
-    RTT::base::OutputPortInterface *out_port = type->outputPort(port_name);
-    if (!out_port)
-    {
-        log(Error) << "An error occurred during output port generation." << endlog();
-        return 0;
-    }
-    
-    ports()->addPort(out_port->getName(), *out_port);
-
-    log(Info) << "Added output port " << port_name << " to task." << endlog();
-     
-    return out_port;
+void BaseTask::addPort(::type_to_vector::PortConfig const & port_config)
+{
+    mDataPorts.push_back(port_config);
 }
 
 bool BaseTask::addDebugOutput(DataVector& vector, int vector_idx) {
@@ -116,9 +84,9 @@ bool BaseTask::addDebugOutput(DataVector& vector, int vector_idx) {
     return true;
 }
 
-bool BaseTask::addInputPort(DataInfo& di, RTT::base::InputPortInterface* reader) {
+bool BaseTask::addInputPortDataHandling(DataInfo& di) {
     
-    RTT::types::TypeInfo const* type = reader->getTypeInfo();
+    RTT::types::TypeInfo const* type = di.readPort->getTypeInfo();
 
     orogen_transports::TypelibMarshallerBase* transport = 
         dynamic_cast<orogen_transports::TypelibMarshallerBase*>(
@@ -138,10 +106,8 @@ bool BaseTask::addInputPort(DataInfo& di, RTT::base::InputPortInterface* reader)
         return false;
     }
 
-    ports()->addEventPort(reader->getName(), *reader); 
    
     di.typelibMarshaller = transport;
-    di.readPort = reader;
     di.handle = di.typelibMarshaller->createSample();
     di.sample = di.typelibMarshaller->getDataSource(di.handle);
 
@@ -187,35 +153,121 @@ void BaseTask::addConvertersToInfo(DataInfo& di, const std::string& slice) {
     di.conversions.addConverter(c_time_ptr);
 }
 
-bool BaseTask::addDataInfo(RTT::base::InputPortInterface* reader, int vector_idx,
-        const std::string& slice) {
+
+RTT::base::OutputPortInterface* BaseTask::createOutputPort(const std::string& port_name,
+        const std::string& type_name) {
     
-    if ( vector_idx < 0 ) return false;
+    RTT::base::PortInterface *pi = ports()->getPort(port_name);
+    if(pi)
+    {
+        // Port exists. Should not be there already.
+        log(Info) << "Port " << port_name << " is already registered." << endlog();
+        return 0;
+    }
+
+    /* Check if port type is known */
+    RTT::types::TypeInfoRepository::shared_ptr ti = 
+        RTT::types::TypeInfoRepository::Instance();
+    RTT::types::TypeInfo* type = ti->type(type_name);
+    if (!type)
+    {
+    	log(Error) << "Cannot find port type " << type_name << 
+            " in the type info repository." << endlog();
+	
+        return 0;
+    }
+    
+    /* Add output port */
+    RTT::base::OutputPortInterface *out_port = type->outputPort(port_name);
+    if (!out_port)
+    {
+        log(Error) << "An error occurred during output port generation." << endlog();
+        return 0;
+    }
+    
+    ports()->addPort(out_port->getName(), *out_port);
+
+    log(Info) << "Added output port " << port_name << " to task." << endlog();
+     
+    return out_port;
+}
+
+RTT::base::InputPortInterface* BaseTask::createInputPort(
+                                ::std::string const & port_name, 
+                                ::std::string const & type_name )
+{
+    
+    /* Check if port already exists (check name) */
+    RTT::base::PortInterface *pi = ports()->getPort(port_name);
+    if(pi)
+    {
+        // Port exists. Returns success.
+        log(Info) << "Port " << port_name << " is already registered." << endlog();
+        return 0;
+    }
+
+    /* Check if port type is known */
+    RTT::types::TypeInfoRepository::shared_ptr ti = 
+        RTT::types::TypeInfoRepository::Instance();
+    RTT::types::TypeInfo* type = ti->type(type_name);
+    if (!type)
+    {
+    	log(Error) << "Cannot find port type " << type_name << 
+            " in the type info repository." << endlog();
+	
+        return 0;
+    }
+    
+    /* Create input port */
+    RTT::base::InputPortInterface *in_port = type->inputPort(port_name);
+    if (!in_port)
+    {
+        log(Error) << "An error occurred during input port generation." << endlog();
+        return 0;
+    }
+    
+    ports()->addEventPort(in_port->getName(), *(in_port) ); 
+    
+    return in_port;
+}
+
+
+bool BaseTask::createDataInfo(const PortConfig& config) {
+    
+    if ( config.vectorIdx < 0 ) return false;
 
     DataInfo di;
     
-    if ( !addInputPort(di, reader) ) return false;
-    
-    di.conversions = VectorConversion(reader->getName());
+    di.readPort = createInputPort(config.portname, config.type);
+    di.rawPort = static_cast<RTT::InputPort<base::VectorXd>*>(
+            createInputPort(config.portname+"_raw", "/base/VectorXd") );
 
-    if ( mVectors.size() <= vector_idx ) mVectors.resize(vector_idx+1);
+    if ( !di.readPort || !di.rawPort ) return false;
     
-    di.mVectorIndex = vector_idx;
+    if ( !addInputPortDataHandling(di) ) return false;
+    
+    di.conversions = VectorConversion(di.readPort->getName());
 
-    DataVector& dv = mVectors.at(vector_idx);
+    if ( mVectors.size() <= config.vectorIdx ) mVectors.resize(config.vectorIdx+1);
+    
+    di.mVectorIndex = config.vectorIdx;
+
+    DataVector& dv = mVectors.at(config.vectorIdx);
 
     aggregator::StreamAligner::Stream<SampleData>::callback_t cb = 
         boost::bind(&BaseTask::sampleCallback,this,_1,_2);
 
     di.streamIndex = _stream_aligner.registerStream<SampleData>(cb, 
-            0, base::Time());
+            0, base::Time::fromSeconds(config.period));
+    di.period = base::Time::fromSeconds(config.period);
+    di.useTimeNow = config.useTimeNow;
 
     di.pStreamAligner = &_stream_aligner;
      
     di.newSample.mDataInfoIndex = mDataInfos.size();
     di.mSampleVectorIndex = dv.addVectorPart();
 
-    addConvertersToInfo(di, slice);
+    addConvertersToInfo(di, config.slice);
     
     mDataInfos.push_back(di);
 
@@ -226,6 +278,7 @@ bool BaseTask::addDataInfo(RTT::base::InputPortInterface* reader, int vector_idx
 
     return true;
 }
+
 
 void BaseTask::processSample(base::Time const& timestamp, SampleData const& sample) {
     
@@ -242,45 +295,6 @@ void BaseTask::processSample(base::Time const& timestamp, SampleData const& samp
 void BaseTask::sampleCallback(base::Time const& timestamp, SampleData const& sample) {
 
    processSample(timestamp, sample);
-}
-
-
-bool BaseTask::createInputPort(::std::string const & port_name, 
-                               ::std::string const & type_name, 
-                               ::std::string const & slice, 
-                               boost::int32_t to_vector)
-{
-    
-    /* Check if port already exists (check name) */
-    RTT::base::PortInterface *pi = ports()->getPort(port_name);
-    if(pi)
-    {
-        // Port exists. Returns success.
-        log(Info) << "Port " << port_name << " is already registered." << endlog();
-        return true;
-    }
-
-    /* Check if port type is known */
-    RTT::types::TypeInfoRepository::shared_ptr ti = 
-        RTT::types::TypeInfoRepository::Instance();
-    RTT::types::TypeInfo* type = ti->type(type_name);
-    if (!type)
-    {
-    	log(Error) << "Cannot find port type " << type_name << 
-            " in the type info repository." << endlog();
-	
-        return false;
-    }
-    
-    /* Create input port */
-    RTT::base::InputPortInterface *in_port = type->inputPort(port_name);
-    if (!in_port)
-    {
-        log(Error) << "An error occurred during input port generation." << endlog();
-        return false;
-    }
-    
-    return addDataInfo(in_port, to_vector, slice);  
 }
 
 
@@ -342,15 +356,6 @@ void BaseTask::clear() {
     mVectors.clear();
 }
 
-
-// bool BaseTask::startHook()
-// {
-//     if (! BaseTaskBase::startHook())
-//         return false;
-//     return true;
-// }
-
-
 bool BaseTask::isDataAvailable () const {
 
     Vectors::const_iterator it = mVectors.begin();
@@ -383,17 +388,43 @@ bool BaseTask::configureHook()
 {
     if (! BaseTaskBase::configureHook())
         return false;
-    
-   
-    // check again for debugs ports to create 
-    Vectors::iterator it = mVectors.begin();
 
+
+    DataPorts::iterator dit = mDataPorts.begin();
+    for ( ; dit != mDataPorts.end(); dit++ ) {
+
+        if ( !createDataInfo(*dit) ) {
+            log(Error) << "couldn't create port " << dit->portname << endlog();
+            return false;
+        }
+    }    
+  
+    Vectors::iterator it = mVectors.begin();
     for (int idx = 0; it != mVectors.end(); it++, idx++ ) {
     
         if (!it->debugOut && !addDebugOutput(*it, idx))
-            log(Error) << "couldn't create debug output port for vector " << idx << endlog();
+            log(Warning) << "couldn't create debug output port for vector " << idx << endlog();
     }
- 
+
+    return true;
+}
+
+bool BaseTask::startHook() {
+
+    base::Time t_now = base::Time::now();
+    base::Time delta_time = t_now - _start_time.get();
+
+    log(Info) << "started at time " << t_now.toString() << " with a delta= " <<
+        delta_time.toSeconds() << endlog();
+    
+    DataInfos::iterator it = mDataInfos.begin();
+
+    for (; it != mDataInfos.end(); it++) {
+
+        it->start = _start_time.get();
+        it->delta = delta_time;
+    }
+
     return true;
 }
 
