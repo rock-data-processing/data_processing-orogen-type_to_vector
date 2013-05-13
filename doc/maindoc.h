@@ -45,7 +45,7 @@
  * Of course the new package must depend on the type_to_vector package. Add
  *
  * \code
- * <depend package="virgo/orogen/type_to_vector"/>
+ * <depend package="data_processing/orogen/type_to_vector"/>
  * \endcode
  *
  * to the \e manifest.xml file.
@@ -65,8 +65,12 @@
  * recommended to add all ports before configuring the task. For examples see the
  * \e script folder of this package.
  *
+ * \note 
+ * It is important to give values for all fields of PortConfig, otherwise
+ * uninitialized values could cause severe problems.
+ *
  * \note
- * The type used for conversion might not directly be the type specified. In case
+ * The type used for conversion might not be the type specified. In case
  * of opaques type, which typelib cannot directly understand and for which 
  * an intermediate type exists, the intermediate type is used. That is especially
  * important to consider when giving slices. Informations regarding the types can be
