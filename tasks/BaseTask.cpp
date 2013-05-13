@@ -354,7 +354,6 @@ void BaseTask::clear() {
 
     mDataInfos.clear();
     mVectors.clear();
-    mDataPorts.clear();
 }
 
 bool BaseTask::isDataAvailable () const {
