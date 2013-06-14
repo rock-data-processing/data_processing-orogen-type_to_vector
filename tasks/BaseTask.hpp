@@ -40,7 +40,6 @@ namespace type_to_vector {
 	friend class BaseTaskBase;
 
         static const int MAX_VECTOR_INDEX;
-
         
         typedef std::vector<DataInfo> DataInfos;
         typedef std::vector<DataVector> Vectors;
@@ -48,10 +47,6 @@ namespace type_to_vector {
         Typelib::Registry* mpRegistry;
         DataInfos mDataInfos;
         Vectors mVectors;
-
-        typedef std::vector<PortConfig> DataPorts;
-
-        DataPorts mDataPorts;
 
         /** Add ports for debug output. */
         bool addDebugOutput(DataVector& vector, int vector_idx);
@@ -70,7 +65,7 @@ namespace type_to_vector {
         virtual bool loadTypekit(std::string const& name);
         
         /** Add a port whose data become part of a vector. */
-        virtual void addPort(::type_to_vector::PortConfig const & port_config);
+        virtual bool addPort(::type_to_vector::PortConfig const & port_config);
        
 
         /** Processing a sample is called by sampleCallback. */

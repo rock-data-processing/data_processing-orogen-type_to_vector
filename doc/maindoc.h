@@ -60,10 +60,10 @@
  *  - \c period
  *  - \c useTimeNow
  * 
- * Add a description for all ports with the addPort operation. This adds it to a list
- * which is processed during configuration and all ports are created then. It is 
- * recommended to add all ports before configuring the task. For examples see the
- * \e script folder of this package.
+ * To create a port give a type_to_vector::PortConfig structure to the addPort operation.
+ * The port will be created immediatly. Note however that the debug port are created
+ * during configuraiton.
+ * For examples see the \e script folder of this package.
  *
  * \note 
  * It is important to give values for all fields of PortConfig, otherwise

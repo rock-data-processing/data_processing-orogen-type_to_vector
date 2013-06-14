@@ -65,26 +65,28 @@ bool BaseTask::loadTypekit(std::string const& name)
     return RTT::plugin::PluginLoader::Instance()->loadLibrary(name);
 }
 
-void BaseTask::addPort(::type_to_vector::PortConfig const & port_config)
+bool BaseTask::addPort(::type_to_vector::PortConfig const & port_config)
 {
     if ( port_config.vectorIdx < 0 || port_config.vectorIdx >= MAX_VECTOR_INDEX )
         throw std::out_of_range("vectorIdx for " + port_config.portname + " is out of range");
 
-    mDataPorts.push_back(port_config);
+    if ( !createDataInfo(port_config) ) {
+        log(Error) << "couldn't create port " << port_config.portname << endlog();
+        return false;
+    }
+
+    return true;
 }
 
 bool BaseTask::addDebugOutput(DataVector& vector, int vector_idx) {
 
-    if (_debug_conversion.get()) {
+    std::string idx_str = boost::lexical_cast<std::string>(vector_idx);
 
-        std::string idx_str = boost::lexical_cast<std::string>(vector_idx);
+    vector.debugOut = createOutputPort("debug_"+idx_str,
+        "/type_to_vector/ConvertedVector");
 
-        vector.debugOut = createOutputPort("debug_"+idx_str,
-            "/type_to_vector/ConvertedVector");
-
-        if ( ! vector.debugOut)
-            return false;
-    }
+    if (!vector.debugOut)
+        return false;
 
     return true;
 }
@@ -393,22 +395,14 @@ bool BaseTask::configureHook()
 {
     if (! BaseTaskBase::configureHook())
         return false;
-
-
-    DataPorts::iterator dit = mDataPorts.begin();
-    for ( ; dit != mDataPorts.end(); dit++ ) {
-
-        if ( !createDataInfo(*dit) ) {
-            log(Error) << "couldn't create port " << dit->portname << endlog();
-            return false;
+ 
+   if ( _debug_conversion.get() ) { 
+        Vectors::iterator it = mVectors.begin();
+        for (int idx = 0; it != mVectors.end(); it++, idx++ ) {
+        
+            if (!it->debugOut && !addDebugOutput(*it, idx))
+                log(Warning) << "couldn't create debug output port for vector " << idx << endlog();
         }
-    }    
-  
-    Vectors::iterator it = mVectors.begin();
-    for (int idx = 0; it != mVectors.end(); it++, idx++ ) {
-    
-        if (!it->debugOut && !addDebugOutput(*it, idx))
-            log(Warning) << "couldn't create debug output port for vector " << idx << endlog();
     }
 
     return true;

@@ -25,6 +25,7 @@ task_context "BaseTask" do
         argument('name', 'std/string', 'the name of the typekit that should be loaded')
 
     operation("addPort").
+        returns('bool').
         argument("port_config", "/type_to_vector/PortConfig", "config for creation of the port").
         doc("adds Port for creation in the configureHook")
 
