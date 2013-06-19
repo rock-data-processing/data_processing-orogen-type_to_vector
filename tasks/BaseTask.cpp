@@ -365,6 +365,8 @@ void BaseTask::clear() {
 
 bool BaseTask::isDataAvailable () const {
 
+    if (mVectors.empty()) return false;
+
     Vectors::const_iterator it = mVectors.begin();
 
     for ( ; it != mVectors.end(); it++)

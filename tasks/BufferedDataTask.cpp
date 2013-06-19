@@ -100,6 +100,8 @@ bool BufferedDataTask::isBufferFilled(int vector_idx) const
 
 bool BufferedDataTask::isDataAvailable () const {
 
+    if (mBuffers.empty()) return false;
+
     Buffers::const_iterator it = mBuffers.begin();
 
     for ( ; it != mBuffers.end(); it++)
