@@ -1,3 +1,4 @@
+#!/usr/bin/env ruby
 require 'readline'
 require 'orocos'
 include Orocos
@@ -33,7 +34,7 @@ Orocos.run 'type_to_vector::BaseTask' => 'task' do |p|
     puts "  data are added to vextorIdx 0"
     pc2 = Types::TypeToVector::PortConfig.new
     pc2.portname = "mc2d"
-    pc2.type = "/base/MotionCommand2D"
+    pc2.type = "/base/commands/Motion2D"
     pc2.vectorIdx = 0
     pc2.period = 0.0
     pc2.useTimeNow = false

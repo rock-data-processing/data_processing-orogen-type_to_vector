@@ -1,3 +1,4 @@
+#!/usr/bin/env ruby
 require 'readline'
 require 'orocos'
 include Orocos
@@ -32,7 +33,7 @@ Orocos.run 'type_to_vector_test' do |p|
 
     mc2d_p = Types::TypeToVector::PortConfig.new
     mc2d_p.portname = "mc2d"
-    mc2d_p.type = "/base/MotionCommand2D"
+    mc2d_p.type = "/base/commands/Motion2D"
     mc2d_p.slice = ""
     mc2d_p.vectorIdx = 0
     mc2d_p.period = 0.0
@@ -42,7 +43,7 @@ Orocos.run 'type_to_vector_test' do |p|
     
     mc2p_p = Types::TypeToVector::PortConfig.new
     mc2p_p.portname = "mc2d_periodic"
-    mc2p_p.type = "/base/MotionCommand2D"
+    mc2p_p.type = "/base/commands/Motion2D"
     mc2p_p.slice = ""
     mc2p_p.vectorIdx = 1
     mc2p_p.period = 0.1
