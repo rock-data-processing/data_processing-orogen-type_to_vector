@@ -433,6 +433,8 @@ void BaseTask::updateHook()
 {
     updateData();
     if ( isDataAvailable() ) process();
+
+    BaseTaskBase::updateHook();
 }
 
 // void BaseTask::errorHook()
