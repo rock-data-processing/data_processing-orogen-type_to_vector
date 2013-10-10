@@ -7,6 +7,8 @@ using_library 'type_to_vector'
 import_types_from 'base'
 import_types_from 'TypeToVectorTypes.hpp'
 
+export_types '/type_to_vector/samples/VectorXd'
+
 task_context "BaseTask" do
     doc "This task provides a infrastructure for processing data types as a "+
     "vector of their values. Input ports can pe added, that automatically are "+

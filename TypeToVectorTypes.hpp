@@ -45,6 +45,14 @@ struct BufferContent {
     base::MatrixXd time;
 };
 
+namespace samples {
+// a timestamped VectorXd
+struct VectorXd {
+    base::VectorXd data;
+    base::Time time;
+};
+}
+
 }
 
 #endif // TYPETOVECTOR_TYPETOVECTORTYPES_HPP
