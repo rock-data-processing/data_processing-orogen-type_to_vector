@@ -82,6 +82,9 @@ bool BufferedDataTask::getDataMatrix(int vector_idx, double from_time, double to
 bool BufferedDataTask::getTimeMatrix(int vector_idx, int from, int to, 
         base::MatrixXd& time_matrix) {
 
+    if(!_buffer_time.get())
+        LOG_WARN_S<<"Timestamps are not buffered. Calling 'getTimeMatrix' without result.";
+
     return mBuffers.at(vector_idx).getTimeMatrix(from, to, time_matrix);
 }
 

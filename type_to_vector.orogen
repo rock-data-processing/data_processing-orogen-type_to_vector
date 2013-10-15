@@ -67,7 +67,7 @@ task_context "BufferedDataTask" do
     property("buffer_size","int",1).
         doc "how many vectors can be stored in the buffer"
 
-    property("buffer_time","bool",false).
+    property("buffer_time","bool",true).
         doc "buffers the time stamps of the vector elements as well"
 
     property("buffer_new_only","bool",false).
