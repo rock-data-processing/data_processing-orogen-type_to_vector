@@ -168,7 +168,7 @@ ConvertedVector& DataVector::getConvertedVector (ConvertedVector& data ) const {
 
 void DataVector::writeDebug() {
 
-    if ( !debugOut && wroteDebug ) return;
+    if ( !debugOut || wroteDebug ) return;
     
     static ConvertedVector data;
     static_cast<RTT::OutputPort<ConvertedVector>*>(debugOut)->
