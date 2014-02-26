@@ -214,6 +214,9 @@ bool VectorBuffer::create (const DataVector& dv, int vector_count, bool buffer_t
     if ( buffer_time ) 
         mTimeBuffer.reset( new MatrixBuffer(dv.vectorSize(), vector_count) );
 
+    // reset mask for flag to identify new samples
+    mNewSampleMask.reset(new MatrixBuffer(dv.vectorSize(), vector_count));
+
     return true;
 }
 
@@ -227,6 +230,11 @@ void VectorBuffer::push (const DataVector& dv) {
         dv.getExpandedTimeVector(mStoreVector);
         mTimeBuffer->push(mStoreVector);
     }
+
+    // push flag for new samples
+    Eigen::VectorXd flagNewSample(dv.vectorSize());
+    flagNewSample.fill(newData);
+    mNewSampleMask->push(flagNewSample);
 }
 
 bool VectorBuffer::getDataMatrix (int from, int to, base::MatrixXd& matrix) {
@@ -265,6 +273,14 @@ bool VectorBuffer::getTimeMatrix (double from_time, double to_time, double delta
 
     return getTimeMatrix(from,to,matrix);
 }
+
+bool VectorBuffer::getNewSampleFlagMatrix(int from, int to, base::MatrixXd& matrix) {
+    if ( !mNewSampleMask.get() )
+        return false;
+
+    mNewSampleMask->getMatrix(from,to,matrix);
+    return true;
+};
 
 BufferContent& VectorBuffer::getBufferContent(BufferContent& content) {
     getDataMatrix(0,-1,content.data);

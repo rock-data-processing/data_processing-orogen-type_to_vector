@@ -154,6 +154,7 @@ public:
     VectorBuffer() : mDataVectorIndex(-1), newData(false), debugOut(0) {}
     
     RTT::base::OutputPortInterface* debugOut;
+    BufferPointer mNewSampleMask; //!< flag to indicate if this sample was new
 
     bool create(const DataVector& dv, int vector_count, bool buffer_time=true);
 
@@ -167,6 +168,11 @@ public:
           base::MatrixXd& matrix);  
     bool getTimeMatrix(double from_time, double to_time, double delta_time,
           base::MatrixXd& matrix);
+
+    /**
+     * Write the flag if the sample is new to 'matrix'
+     */
+    bool getNewSampleFlagMatrix(int from, int to, base::MatrixXd& matrix);
 
     bool isFilled() const { return isCreated() && mDataBuffer->isFilled(); }
 

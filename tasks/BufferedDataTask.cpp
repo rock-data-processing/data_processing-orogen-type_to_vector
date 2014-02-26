@@ -96,6 +96,15 @@ bool BufferedDataTask::getTimeMatrix(int vector_idx, double from_time, double to
 
     return mBuffers.at(vector_idx).getTimeMatrix(from_time, to_time, dt, time_matrix); 
 }
+
+double BufferedDataTask::getBufferedSamplesRatio(unsigned int index) {
+    base::MatrixXd flags;
+    // get the complete flags for all samples
+    mBuffers.at(index).getNewSampleFlagMatrix(0,-1,flags);
+
+    // flags.mean() is the average of new samples for all dimensions (the flag is equal per dimension)
+    return 1 - flags.mean();
+}
         
 bool BufferedDataTask::isBufferFilled(int vector_idx) const 
     { return mBuffers.at(vector_idx).isFilled(); }
@@ -116,7 +125,9 @@ bool BufferedDataTask::isDataAvailable () const {
 void BufferedDataTask::updateData() {
 
     BufferedDataTaskBase::updateData();
-    
+
+    base::VectorXd buffered_samples_ratio(mBuffers.size());
+
     Buffers::iterator it = mBuffers.begin();
     
     for ( int i=0; it != mBuffers.end(); it++,i++ ) {
@@ -130,13 +141,20 @@ void BufferedDataTask::updateData() {
                 ((_buffer_new_only.get() && it->newData) || !_buffer_new_only.get()) ) {
 
             const DataVector& dv = getDataVector(it->mDataVectorIndex);
+            // push the data vector and the newData flag
             it->push(dv);
 
             it->newData = false;
             
             it->writeDebug();
+
+            // store ratio per data index
+            buffered_samples_ratio[it->mDataVectorIndex] = getBufferedSamplesRatio(it->mDataVectorIndex);
         }
     }
+
+     // write ratio
+    _buffered_samples_ratio.write(buffered_samples_ratio);
 }
 
 bool BufferedDataTask::configureHook() {

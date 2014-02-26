@@ -75,6 +75,9 @@ task_context "BufferedDataTask" do
 
     property("debug_buffer","bool",false).
         doc "if true, a debug output port for the buffer data is created "
+
+    output_port("buffered_samples_ratio", '/base/VectorXd').
+        doc("the ratio of sample-and-hold interpolated samples")
 end
 
 deployment "type_to_vector_test" do

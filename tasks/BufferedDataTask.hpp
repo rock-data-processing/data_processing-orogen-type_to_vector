@@ -55,6 +55,14 @@ namespace type_to_vector {
         bool getTimeMatrix(int vector_idx, double from_time, double to_time, 
                 base::MatrixXd& time_matrix);
 
+        /**
+         * Computes the ratio of buffered samples that were copied
+         * from the previous sample because of missing new samples
+         * @param index index of the port
+         * returns the ratio of buffered samples
+         */
+        double getBufferedSamplesRatio(unsigned int index);
+
         /** Is the Buffer filled.  */
         bool isBufferFilled(int vector_idx) const;
 
