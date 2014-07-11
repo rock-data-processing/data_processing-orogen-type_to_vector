@@ -19,6 +19,7 @@ task_context "BaseTask" do
     needs_configuration
 
     dynamic_input_port(/\w+/, nil).task_trigger
+    dynamic_output_port(/\w+/, nil)
 
     dynamic_output_port(/^debug_\d+$/, '/type_to_vector/ConvertedVector')
     

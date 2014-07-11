@@ -75,7 +75,62 @@ bool BaseTask::addPort(::type_to_vector::PortConfig const & port_config)
         return false;
     }
 
+    if( !createOutputInfo(port_config, mDataInfos.back())) {
+        log(Error) << "couldn't create port " << port_config.portname << endlog();
+        return false;
+    }
+
     return true;
+}
+
+bool BaseTask::createOutputInfo(const PortConfig& config, const DataInfo &di) {
+
+    OutputInfo oi;
+
+    oi.write_port = createOutputPort(config.portname+"_out", config.type);
+    if(!oi.write_port) return false;
+
+    oi.sample = di.sample;//oi.typelibMarshaller->getDataSource(oi.handle);
+
+    VectorToc toc = VectorTocMaker().apply(*(mpRegistry->get(di.typelibMarshaller->getMarshallingType())) );
+    VectorToc toc_sliced = VectorTocSlicer::slice(toc, config.slice);
+
+    typedef AbstractBackConverter::Pointer ConvertPtr;
+
+    if ( toc_sliced.isFlat() ){
+        oi.back_converter = ConvertPtr(new FlatBackConverter(toc_sliced));
+    }
+    else {
+        oi.back_converter = ConvertPtr(new BackConverter(toc_sliced, *mpRegistry));
+        boost::static_pointer_cast<BackConverter>(oi.back_converter)->setSlice(config.slice);
+    }
+    mOutputInfos.push_back(oi);
+
+    std::cout<<"createOutputInfo: TOC: "<<mOutputInfos[0].back_converter->mToc.mSlice<<" "<<mOutputInfos[0].back_converter->mToc.mType<<" "<<mOutputInfos[0].back_converter->mToc.maxDepth<<std::endl;
+
+    return true;
+}
+
+void BaseTask::convertBackAndWrite(){
+
+    for(uint i = 0; i <  mOutputInfos.size(); i++){
+
+        if(mOutputInfos[i].data_available)
+        {
+            mOutputInfos[i].back_converter->apply(mOutputInfos[i].vect, mOutputInfos[i].sample->getRawPointer());
+                    mOutputInfos[i].write_port->write(mOutputInfos[i].sample);
+            mOutputInfos[i].data_available = false;
+        }
+    }
+}
+
+void BaseTask::setOutputVector(int vector_index, const Eigen::VectorXd& data){
+
+    if(mOutputInfos.at(vector_index).vect.size() != data.size())
+        mOutputInfos.at(vector_index).vect.resize(data.size());
+
+    mOutputInfos.at(vector_index).vect.assign(data.data(), data.data() + data.size());
+    mOutputInfos.at(vector_index).data_available = true;
 }
 
 bool BaseTask::addDebugOutput(DataVector& vector, int vector_idx) {
@@ -359,6 +414,15 @@ void BaseTask::clear() {
             ports()->removePort(dv.debugOut->getName());
     }
 
+    OutputInfos::iterator itt = mOutputInfos.begin();
+
+    for( ; itt != mOutputInfos.end(); itt++) {
+
+        ports()->removePort(itt->write_port->getName());
+        delete itt->write_port;
+    }
+
+    mOutputInfos.clear();
     mDataInfos.clear();
     mVectors.clear();
 }
@@ -432,7 +496,10 @@ bool BaseTask::startHook() {
 void BaseTask::updateHook()
 {
     updateData();
-    if ( isDataAvailable() ) process();
+    if ( isDataAvailable() ){
+        process();
+        convertBackAndWrite();
+    }
 
     BaseTaskBase::updateHook();
 }
