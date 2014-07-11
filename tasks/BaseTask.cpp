@@ -106,8 +106,6 @@ bool BaseTask::createOutputInfo(const PortConfig& config, const DataInfo &di) {
     }
     mOutputInfos.push_back(oi);
 
-    std::cout<<"createOutputInfo: TOC: "<<mOutputInfos[0].back_converter->mToc.mSlice<<" "<<mOutputInfos[0].back_converter->mToc.mType<<" "<<mOutputInfos[0].back_converter->mToc.maxDepth<<std::endl;
-
     return true;
 }
 
