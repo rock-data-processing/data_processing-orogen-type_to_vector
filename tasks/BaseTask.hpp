@@ -4,7 +4,6 @@
 #define TYPE_TO_VECTOR_BASETASK_TASK_HPP
 
 #include "type_to_vector/BaseTaskBase.hpp"
-#include <type_to_vector/BackConverter.hpp>
 
 namespace Typelib {
     class Registry;
@@ -17,19 +16,11 @@ namespace RTT{
 }
       
 namespace type_to_vector {
-    
+
     struct DataInfo;
     struct DataVector;
     struct SampleData;
-
-    struct OutputInfo{
-        OutputInfo(){data_available=false;}
-        AbstractBackConverter::Pointer back_converter;
-        RTT::base::DataSourceBase::shared_ptr sample;
-        RTT::base::OutputPortInterface* write_port;
-        std::vector<double> vect;
-        bool data_available;
-    };
+    struct OutputInfo;
 
     /*! \class BaseTask 
      * \brief This task provides an interface to add input ports that are assembled into
@@ -52,12 +43,10 @@ namespace type_to_vector {
         static const int MAX_VECTOR_INDEX;
         
         typedef std::vector<DataInfo> DataInfos;
-        typedef std::vector<OutputInfo> OutputInfos;
         typedef std::vector<DataVector> Vectors;
 
         Typelib::Registry* mpRegistry;
         DataInfos mDataInfos;
-        OutputInfos mOutputInfos;
         Vectors mVectors;
 
         /** Add ports for debug output. */
@@ -96,9 +85,6 @@ namespace type_to_vector {
        
         /** Clear eveyrhint including removing all input ports. */ 
         virtual void clear();
-
-        /** Add information about outgoing connections and data*/
-        virtual bool createOutputInfo(const PortConfig& config, const DataInfo &di);
 
         /** Convert the data that has been set with setOutputVector() back to the original data type and write it to output port */
         void convertBackAndWrite();

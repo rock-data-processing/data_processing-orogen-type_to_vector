@@ -12,9 +12,9 @@
 
 #include <base/eigen.h>
 #include <base/samples/rigid_body_state.h>
+#include "VectorDataStorage.hpp"
 
 #include "../TypeToVectorTypes.hpp"
-#include "VectorDataStorage.hpp"
 
 #include "BaseTask.hpp"
 
@@ -75,60 +75,44 @@ bool BaseTask::addPort(::type_to_vector::PortConfig const & port_config)
         return false;
     }
 
-    if( !createOutputInfo(port_config, mDataInfos.back())) {
-        log(Error) << "couldn't create port " << port_config.portname << endlog();
-        return false;
-    }
-
-    return true;
-}
-
-bool BaseTask::createOutputInfo(const PortConfig& config, const DataInfo &di) {
-
-    OutputInfo oi;
-
-    oi.write_port = createOutputPort(config.portname+"_out", config.type);
-    if(!oi.write_port) return false;
-
-    oi.sample = di.sample;//oi.typelibMarshaller->getDataSource(oi.handle);
-
-    VectorToc toc = VectorTocMaker().apply(*(mpRegistry->get(di.typelibMarshaller->getMarshallingType())) );
-    VectorToc toc_sliced = VectorTocSlicer::slice(toc, config.slice);
-
-    typedef AbstractBackConverter::Pointer ConvertPtr;
-
-    if ( toc_sliced.isFlat() ){
-        oi.back_converter = ConvertPtr(new FlatBackConverter(toc_sliced));
-    }
-    else {
-        oi.back_converter = ConvertPtr(new BackConverter(toc_sliced, *mpRegistry));
-        boost::static_pointer_cast<BackConverter>(oi.back_converter)->setSlice(config.slice);
-    }
-    mOutputInfos.push_back(oi);
-
     return true;
 }
 
 void BaseTask::convertBackAndWrite(){
 
-    for(uint i = 0; i <  mOutputInfos.size(); i++){
+    for(uint i = 0; i <  mDataInfos.size(); i++){
 
-        if(mOutputInfos[i].data_available)
+        if(mDataInfos[i].output_data_available)
         {
-            mOutputInfos[i].back_converter->apply(mOutputInfos[i].vect, mOutputInfos[i].sample->getRawPointer());
-                    mOutputInfos[i].write_port->write(mOutputInfos[i].sample);
-            mOutputInfos[i].data_available = false;
+            mDataInfos[i].back_converter->apply(mDataInfos[i].output_vect, mDataInfos[i].sample->getRawPointer());
+
+            mDataInfos[i].write_port->write(mDataInfos[i].sample);
+
+            mDataInfos[i].output_data_available = false;
         }
     }
 }
 
 void BaseTask::setOutputVector(int vector_index, const Eigen::VectorXd& data){
 
-    if(mOutputInfos.at(vector_index).vect.size() != data.size())
-        mOutputInfos.at(vector_index).vect.resize(data.size());
+    int start_index = 0;
+    for(uint i = 0; i < mDataInfos.size(); i++)
+    {
+        int data_size =  mDataInfos[i].newSample.mData.size();
 
-    mOutputInfos.at(vector_index).vect.assign(data.data(), data.data() + data.size());
-    mOutputInfos.at(vector_index).data_available = true;
+        if(mDataInfos[i].mVectorIndex == vector_index)
+        {
+            if( mDataInfos[i].output_vect.size() != data_size)
+                mDataInfos[i].output_vect.resize(data_size);
+
+            for(int j = 0; j < data_size; j++)
+                mDataInfos[i].output_vect[j] = data(j + start_index);
+
+            mDataInfos[i].output_data_available = true;
+
+            start_index += data_size;
+        }
+    }
 }
 
 bool BaseTask::addDebugOutput(DataVector& vector, int vector_idx) {
@@ -211,6 +195,18 @@ void BaseTask::addConvertersToInfo(DataInfo& di, const std::string& slice) {
     
     di.conversions.addConverter(c_sliced_ptr);
     di.conversions.addConverter(c_time_ptr);
+
+    //For back conversion
+
+    typedef AbstractBackConverter::Pointer BackConvertPtr;
+
+    if ( toc_sliced.isFlat() ){
+        di.back_converter = BackConvertPtr(new FlatBackConverter(toc_sliced));
+    }
+    else {
+        di.back_converter = BackConvertPtr(new BackConverter(toc_sliced, *mpRegistry));
+        boost::static_pointer_cast<BackConverter>(di.back_converter)->setSlice(slice);
+    }
 }
 
 
@@ -301,8 +297,10 @@ bool BaseTask::createDataInfo(const PortConfig& config) {
     di.readPort = createInputPort(config.portname, config.type);
     di.rawPort = static_cast<RTT::InputPort<base::VectorXd>*>(
             createInputPort(config.portname+"_raw", "/base/VectorXd") );
+    di.write_port = createOutputPort(config.portname+"_out", config.type);
+    if(!di.write_port) return false;
 
-    if ( !di.readPort || !di.rawPort ) return false;
+    if ( !di.readPort || !di.rawPort || !di.write_port) return false;
     
     if ( !addInputPortDataHandling(di) ) return false;
     
@@ -328,7 +326,7 @@ bool BaseTask::createDataInfo(const PortConfig& config) {
     di.mSampleVectorIndex = dv.addVectorPart();
 
     addConvertersToInfo(di, config.slice);
-    
+
     mDataInfos.push_back(di);
 
     log(Info) << "added data info for " << mDataInfos.back().readPort->getName() <<
@@ -410,17 +408,11 @@ void BaseTask::clear() {
         DataVector& dv = mVectors.at(it->mVectorIndex);
         if ( dv.debugOut )
             ports()->removePort(dv.debugOut->getName());
+
+        ports()->removePort(it->write_port->getName());
+        delete it->write_port;
     }
 
-    OutputInfos::iterator itt = mOutputInfos.begin();
-
-    for( ; itt != mOutputInfos.end(); itt++) {
-
-        ports()->removePort(itt->write_port->getName());
-        delete itt->write_port;
-    }
-
-    mOutputInfos.clear();
     mDataInfos.clear();
     mVectors.clear();
 }
@@ -459,6 +451,13 @@ bool BaseTask::configureHook()
 {
     if (! BaseTaskBase::configureHook())
         return false;
+
+    std::vector<PortConfig> port_config = _port_config.get();
+    for(uint i = 0; i < port_config.size(); i++)
+    {
+        if(!addPort(port_config[i]))
+            return false;
+    }
  
    if ( _debug_conversion.get() ) { 
         Vectors::iterator it = mVectors.begin();

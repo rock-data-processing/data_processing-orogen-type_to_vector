@@ -19,7 +19,7 @@
 #include <type_to_vector/Definitions.hpp>
 #include <type_to_vector/VectorBuilder.hpp>
 #include <type_to_vector/MatrixBuffer.hpp>
-
+#include <type_to_vector/BackConverter.hpp>
 #include "../TypeToVectorTypes.hpp"
 
 namespace RTT {
@@ -76,6 +76,13 @@ struct DataInfo {
     
     int mVectorIndex; //!< Vector to put the data in. 
     int mSampleVectorIndex;
+
+    //For back conversion
+
+    AbstractBackConverter::Pointer back_converter;
+    RTT::base::OutputPortInterface* write_port;
+    std::vector<double> output_vect;
+    bool output_data_available;
 
     /** Fetches data from the port, convert it and add it to the appropiate stream.*/
     bool update(bool create_places=false);
