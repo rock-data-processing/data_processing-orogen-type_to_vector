@@ -20,7 +20,7 @@ task_context "BaseTask" do
 
     dynamic_input_port(/\w+/, nil).task_trigger
     dynamic_output_port(/\w+/, nil)
-
+    dynamic_output_port(/^raw_out_\d+$/, '/base/VectorXd')
     dynamic_output_port(/^debug_\d+$/, '/type_to_vector/ConvertedVector')
     
     operation('loadTypekit').
@@ -45,7 +45,7 @@ task_context "BaseTask" do
         doc "reference time to be used for not time stamped data"
 
     property("port_config", "std/vector</type_to_vector/PortConfig>").
-        doc("Optional configuration of all ports. Same as calling addPort() multiple times.")
+        doc("Add multiple in and output ports (Optional). Same as calling addPort() multiple times.")
 
     stream_aligner do
         max_latency 0.1

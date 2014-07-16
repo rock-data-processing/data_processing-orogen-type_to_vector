@@ -99,6 +99,7 @@ struct DataVector : public std::vector<SampleData> {
     bool wroteDebug; 
     
     RTT::base::OutputPortInterface* debugOut;
+    RTT::base::OutputPortInterface* rawOut;
 
     DataVector() : mUpdated(false), wroteDebug(true), debugOut(0) {}
 
@@ -132,6 +133,8 @@ struct DataVector : public std::vector<SampleData> {
 
     /** Write debug data to the port. */
     void writeDebug();
+
+    void writeRaw();
 
     /** Returns true, if all parts have been update once. */
     bool isFilled() const;

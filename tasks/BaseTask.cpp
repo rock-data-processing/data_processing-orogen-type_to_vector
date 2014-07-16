@@ -128,6 +128,16 @@ bool BaseTask::addDebugOutput(DataVector& vector, int vector_idx) {
     return true;
 }
 
+bool BaseTask::addRawOutput(DataVector& vector, int vector_idx) {
+    std::string idx_str = boost::lexical_cast<std::string>(vector_idx);
+
+    vector.rawOut = createOutputPort("raw_out_"+idx_str,
+        "/base/VectorXd");
+
+    return vector.rawOut != 0;
+}
+
+
 bool BaseTask::addInputPortDataHandling(DataInfo& di) {
     
     RTT::types::TypeInfo const* type = di.readPort->getTypeInfo();
@@ -404,13 +414,22 @@ void BaseTask::clear() {
         _stream_aligner.unregisterStream(it->streamIndex);
 
         ports()->removePort(it->readPort->getName());
-
-        DataVector& dv = mVectors.at(it->mVectorIndex);
-        if ( dv.debugOut )
-            ports()->removePort(dv.debugOut->getName());
+        delete it->readPort;
 
         ports()->removePort(it->write_port->getName());
         delete it->write_port;
+    }
+
+    for(uint i = 0; i < mVectors.size(); i++) {
+
+        ports()->removePort(mVectors[i].rawOut->getName());
+        delete mVectors[i].rawOut;
+
+        if ( mVectors[i].debugOut ){
+            ports()->removePort(mVectors[i].debugOut->getName());
+            delete mVectors[i].debugOut;
+        }
+
     }
 
     mDataInfos.clear();
@@ -429,6 +448,18 @@ bool BaseTask::isDataAvailable () const {
     return true;
 }
 
+void BaseTask::process(){
+
+    //Default behavior: Simply forward the incoming data to output ports. If you want to
+    //do data processing, overwrite this method in derived task context
+    for ( uint i = 0; i < mVectors.size(); i++ ) {
+
+        base::VectorXd vect;
+        getVector(i, vect);
+        setOutputVector(i, vect);
+    }
+}
+
 void BaseTask::updateData() {
     
     DataInfos::iterator data_it = mDataInfos.begin();
@@ -438,9 +469,13 @@ void BaseTask::updateData() {
     }
     
     while ( _stream_aligner.step() );
-        
+
+    Vectors::iterator vector_it = mVectors.begin();
+    for ( ; vector_it != mVectors.end(); vector_it++ )
+        vector_it->writeRaw();
+
     if ( _debug_conversion.get() ) {
-        Vectors::iterator vector_it = mVectors.begin();
+        vector_it = mVectors.begin();
         for ( ; vector_it != mVectors.end(); vector_it++ )
             vector_it->writeDebug();
     }
@@ -459,8 +494,17 @@ bool BaseTask::configureHook()
             return false;
     }
  
+    Vectors::iterator it = mVectors.begin();
+    for (int idx = 0; it != mVectors.end(); it++, idx++ ) {
+
+        if (!addRawOutput(*it, idx)){
+            log(Error) << "couldn't create raw output port for vector " << idx << endlog();
+            return false;
+        }
+    }
+
    if ( _debug_conversion.get() ) { 
-        Vectors::iterator it = mVectors.begin();
+        it = mVectors.begin();
         for (int idx = 0; it != mVectors.end(); it++, idx++ ) {
         
             if (!it->debugOut && !addDebugOutput(*it, idx))

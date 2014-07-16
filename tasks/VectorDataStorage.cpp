@@ -195,6 +195,12 @@ int DataVector::vectorSize() const {
     return size;
 }
 
+void DataVector::writeRaw(){
+    base::VectorXd raw;
+    getVector(raw);
+    static_cast<RTT::OutputPort<base::VectorXd>*>(rawOut)->write(raw);
+}
+
 bool VectorBuffer::create (const DataVector& dv, int vector_count, bool buffer_time) {
 
     if ( !dv.isFilled() ) return false;

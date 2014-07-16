@@ -51,6 +51,8 @@ namespace type_to_vector {
 
         /** Add ports for debug output. */
         bool addDebugOutput(DataVector& vector, int vector_idx);
+
+        bool addRawOutput(DataVector& vector, int vector_idx);
        
         /** Adds an input port to data infos, especially the data handling. */ 
         bool addInputPortDataHandling(DataInfo& di);
@@ -128,8 +130,8 @@ namespace type_to_vector {
 
         /** The processing method, that runs the algorithm.
          *
-         * Implement the algorithm here and use getVector to get the vectors.*/
-        virtual void process() {}
+         * Implement the algorithm here and use getVector to get the vectors. Default behaviour: Forward data*/
+        virtual void process();
 
         /** Fetches the data from the ports, forward them to the stream aligner and
          * step through the stream aligner. */
