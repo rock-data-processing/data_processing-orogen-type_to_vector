@@ -1,6 +1,6 @@
 // \file  DataStorage.cpp
 
-#include <base/eigen.h>
+#include <base/Eigen.hpp>
 
 #include <rtt/base/PortInterface.hpp>
 #include <rtt/base/InputPortInterface.hpp>

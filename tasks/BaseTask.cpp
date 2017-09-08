@@ -10,8 +10,7 @@
 #include <type_to_vector/VectorTocMaker.hpp>
 #include <type_to_vector/Converter.hpp>
 
-#include <base/eigen.h>
-#include <base/samples/rigid_body_state.h>
+#include <base/Eigen.hpp>
 #include "VectorDataStorage.hpp"
 
 #include "../TypeToVectorTypes.hpp"
