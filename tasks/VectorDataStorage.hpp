@@ -14,7 +14,7 @@
 
 #include <rtt/typelib/TypelibMarshallerBase.hpp>
 
-#include <base/time.h>
+#include <base/Time.hpp>
 
 #include <type_to_vector/Definitions.hpp>
 #include <type_to_vector/VectorBuilder.hpp>
