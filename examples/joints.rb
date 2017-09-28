@@ -11,9 +11,6 @@ Orocos.run "type_to_vector::BaseTask" => "task" do
 
     in_data = Types.base.samples.Joints.new
     in_data.elements = [Types.base.JointState.new] * 5
-    in_data.elements.each do |e|
-        e.position = rand
-    end
 
     writer_1    = task.joints_1.writer
     writer_2    = task.joints_2.writer
@@ -21,8 +18,12 @@ Orocos.run "type_to_vector::BaseTask" => "task" do
     reader_some = task.raw_out_1.reader
 
     while true
+        in_data.elements.each do |e|
+            e.position = rand
+        end
         writer_1.write in_data
         writer_2.write in_data
+        sleep 0.1
 
         sample_all  = reader_all.read
         sample_some = reader_some.read
@@ -35,6 +36,5 @@ Orocos.run "type_to_vector::BaseTask" => "task" do
             puts "Some joints: " + sample_some.to_a.to_s
             puts "................................."
         end
-        sleep 0.1
     end
 end

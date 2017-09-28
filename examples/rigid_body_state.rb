@@ -10,19 +10,19 @@ Orocos.run "type_to_vector::BaseTask" => "task" do
     task.start
 
     in_data = Types.base.samples.RigidBodyState.new
-    in_data.position = Types.base.Vector3d.new(1,2,3)
 
     writer = task.rbs.writer
     reader = task.raw_out_0.reader
 
     while true
+        in_data.position = Types.base.Vector3d.new(rand(),rand(),rand())
         writer.write in_data
-        sample = reader.read
+        sleep 0.1
+        sample = reader.read_new
         if sample
             puts "Typed data: " + in_data.position.to_a.to_s
             puts "Raw data:   " + sample.to_a.to_s
             puts "................................."
         end
-        sleep 0.1
     end
 end
