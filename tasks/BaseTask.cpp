@@ -81,6 +81,7 @@ void BaseTask::convertBackAndWrite(){
 
     for(uint i = 0; i <  mDataInfos.size(); i++){
 
+
         if(mDataInfos[i].output_data_available)
         {
             mDataInfos[i].back_converter->apply(mDataInfos[i].output_vect, mDataInfos[i].sample->getRawPointer());
@@ -449,14 +450,16 @@ bool BaseTask::isDataAvailable () const {
 
 void BaseTask::process(){
 
+    //Back conversion does not work for VectorXd data type! It hangs in BackConverter::visit(), which is why this section is commented right now
+
     //Default behavior: Simply forward the incoming data to output ports. If you want to
     //do data processing, overwrite this method in derived task context
-    for ( uint i = 0; i < mVectors.size(); i++ ) {
+    /*for ( uint i = 0; i < mVectors.size(); i++ ) {
 
         base::VectorXd vect;
         getVector(i, vect);
         setOutputVector(i, vect);
-    }
+    }*/
 }
 
 void BaseTask::updateData() {
