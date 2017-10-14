@@ -10,10 +10,10 @@
 #include <type_to_vector/VectorTocMaker.hpp>
 #include <type_to_vector/Converter.hpp>
 
-#include <base/eigen.h>
-#include <base/samples/rigid_body_state.h>
+#include <base/Eigen.hpp>
+#include <base/samples/RigidBodyState.hpp>
 
-#include "../TypeToVectorTypes.hpp"
+#include <type_to_vector/TypeToVectorTypes.hpp>
 #include "VectorDataStorage.hpp"
 
 #include "BaseTask.hpp"

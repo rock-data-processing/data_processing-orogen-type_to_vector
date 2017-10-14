@@ -4,8 +4,8 @@
 #define TYPETOVECTOR_TYPETOVECTORTYPES_HPP
 
 #include <string>
-#include <base/eigen.h>
-#include <base/time.h>
+#include <base/Eigen.hpp>
+#include <base/Time.hpp>
 #include <type_to_vector/Definitions.hpp>
 
 namespace type_to_vector {
