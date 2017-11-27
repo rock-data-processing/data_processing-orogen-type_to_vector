@@ -1,0 +1,29 @@
+--- name:rigid_body_state
+# Add multiple in and output ports (Optional). Same as calling addPort() multiple times.
+port_config:
+  - portname: rbs
+    type: /base/samples/RigidBodyState
+    slice: position
+    vectorIdx: 0
+
+--- name:joints
+# Add multiple in and output ports (Optional). Same as calling addPort() multiple times.
+port_config:
+   # All joints
+  - portname: joints_1
+    type: /base/samples/Joints
+    slice: elements.*.position
+    vectorIdx: 0
+    # Some joints
+  - portname: joints_2
+    type: /base/samples/Joints
+    slice: elements.[0-2].position
+    vectorIdx: 1
+
+--- name:vector_xd
+# Add multiple in and output ports (Optional). Same as calling addPort() multiple times.
+port_config:
+  - portname: vector
+    type: /base/VectorXd
+    slice: data.[0-2]
+    vectorIdx: 0
