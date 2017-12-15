@@ -398,6 +398,13 @@ bool BaseTask::configureHook()
     if (! BaseTaskBase::configureHook())
         return false;
  
+   std::vector<PortConfig> port_config = _port_config.get();
+   for(uint i = 0; i < port_config.size(); i++)
+   {
+       if(!addPort(port_config[i]))
+           return false;
+   }
+
    if ( _debug_conversion.get() ) { 
         Vectors::iterator it = mVectors.begin();
         for (int idx = 0; it != mVectors.end(); it++, idx++ ) {
