@@ -98,6 +98,12 @@ namespace type_to_vector {
         /** Get the vector at vector_idx. */
         void getVector(int vector_idx, base::VectorXd& vector) const;
 
+        /** Convert the data that has been set with setVector() back to the original data type and write it to output port */
+        void convertBackAndWrite();
+
+        /** Set the vector at vector_idx. */
+        void setVector(int vector_index, const base::VectorXd& vector);
+
         /** Get the time vector of vector at vector_idx. */
         void getTimeVector(int vector_idx, base::VectorXd& time_vector) const;
 

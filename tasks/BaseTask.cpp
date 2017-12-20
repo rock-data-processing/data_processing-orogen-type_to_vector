@@ -158,6 +158,15 @@ void BaseTask::addConvertersToInfo(DataInfo& di, const std::string& slice) {
     
     di.conversions.addConverter(c_sliced_ptr);
     di.conversions.addConverter(c_time_ptr);
+
+    //For back conversion
+    typedef AbstractBackConverter::Pointer BackConvertPtr;
+    if ( toc_sliced.isFlat() )
+        di.back_converter = BackConvertPtr(new FlatBackConverter(toc_sliced));
+    else {
+        di.back_converter = BackConvertPtr(new BackConverter(toc_sliced, *mpRegistry));
+        boost::static_pointer_cast<BackConverter>(di.back_converter)->setSlice(slice);
+    }
 }
 
 
@@ -249,7 +258,13 @@ bool BaseTask::createDataInfo(const PortConfig& config) {
     di.rawPort = static_cast<RTT::InputPort<base::VectorXd>*>(
             createInputPort(config.portname+"_raw", "/base/VectorXd") );
 
+    di.write_port = createOutputPort(config.portname+"_out", config.type);
+    if(!di.write_port) return false;
+
     if ( !di.readPort || !di.rawPort ) return false;
+    if ( !di.readPort || !di.rawPort || !di.write_port) return false;
+
+
     
     if ( !addInputPortDataHandling(di) ) return false;
     
@@ -325,6 +340,39 @@ void BaseTask::getVector(int vector_idx, base::VectorXd& vector) const {
     mVectors.at(vector_idx).getVector(vector);
 }
 
+void BaseTask::convertBackAndWrite(){
+    for(uint i = 0; i <  mDataInfos.size(); i++){
+        if(mDataInfos[i].output_data_available){
+            mDataInfos[i].back_converter->apply(mDataInfos[i].output_vect, mDataInfos[i].sample->getRawPointer());
+            mDataInfos[i].write_port->write(mDataInfos[i].sample);
+            mDataInfos[i].output_data_available = false;
+        }
+    }
+}
+
+
+void BaseTask::setVector(int vector_index, const base::VectorXd& vector){
+
+    int start_index = 0;
+    for(uint i = 0; i < mDataInfos.size(); i++)
+    {
+        int data_size =  mDataInfos[i].newSample.mData.size();
+
+        if(mDataInfos[i].mVectorIndex == vector_index)
+        {
+            if( mDataInfos[i].output_vect.size() != data_size)
+                mDataInfos[i].output_vect.resize(data_size);
+
+            for(int j = 0; j < data_size; j++)
+                mDataInfos[i].output_vect[j] = vector(j + start_index);
+
+            mDataInfos[i].output_data_available = true;
+
+            start_index += data_size;
+        }
+    }
+}
+
 void BaseTask::getTimeVector(int vector_idx, base::VectorXd& time_vector) const {
     mVectors.at(vector_idx).getTimeVector(time_vector);
 }
@@ -353,10 +401,17 @@ void BaseTask::clear() {
         _stream_aligner.unregisterStream(it->streamIndex);
 
         ports()->removePort(it->readPort->getName());
+        delete it->readPort;
 
-        DataVector& dv = mVectors.at(it->mVectorIndex);
-        if ( dv.debugOut )
-            ports()->removePort(dv.debugOut->getName());
+        ports()->removePort(it->write_port->getName());
+        delete it->write_port;
+    }
+
+    for(uint i = 0; i < mVectors.size(); i++) {
+         if ( mVectors[i].debugOut ){
+             ports()->removePort(mVectors[i].debugOut->getName());
+             delete mVectors[i].debugOut;
+         }
     }
 
     mDataInfos.clear();
@@ -439,7 +494,10 @@ bool BaseTask::startHook() {
 void BaseTask::updateHook()
 {
     updateData();
-    if ( isDataAvailable() ) process();
+    if ( isDataAvailable() ){
+        process();
+        convertBackAndWrite();
+    }
 
     BaseTaskBase::updateHook();
 }
