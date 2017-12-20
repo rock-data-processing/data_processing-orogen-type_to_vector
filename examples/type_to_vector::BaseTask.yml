@@ -1,4 +1,5 @@
 --- name:default
+# create a debug port for a vector and sends the conversion results to it
 debug_conversion: true
 
 --- name:rigid_body_state
@@ -29,4 +30,12 @@ port_config:
   - portname: vector
     type: /base/VectorXd
     slice: data.[0-2]
+    vectorIdx: 0
+
+--- name:double
+# Add multiple in and output ports (Optional). Same as calling addPort() multiple times.
+port_config:
+  - portname: double
+    type: /double
+    slice: ""
     vectorIdx: 0
