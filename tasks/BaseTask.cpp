@@ -496,7 +496,7 @@ void BaseTask::updateHook()
     updateData();
     if ( isDataAvailable() ){
         process();
-        convertBackAndWrite();
+        //convertBackAndWrite();
     }
 
     BaseTaskBase::updateHook();
