@@ -21,7 +21,7 @@ task_context "BaseTask" do
     dynamic_input_port(/\w+/, nil).task_trigger
 
     dynamic_output_port(/^debug_\d+$/, '/type_to_vector/ConvertedVector')
-    
+
     operation('loadTypekit').
         returns('bool').
         argument('name', 'std/string', 'the name of the typekit that should be loaded')
@@ -36,7 +36,7 @@ task_context "BaseTask" do
 
     property("create_places","/bool",false).
         doc "creates place information during conversion"
-    
+
     property("time_fields","/std/string","time").
         doc "space seperated list of valid timestamp fields"
 
@@ -45,6 +45,9 @@ task_context "BaseTask" do
 
     property("port_config", "std/vector</type_to_vector/PortConfig>").
         doc("Add multiple in and output ports (Optional). Same as calling addPort() multiple times.")
+
+    property("typekits", "std/vector</std/string>").
+        doc("Additional typekits to load.")
 
     stream_aligner do
         max_latency 0.1
@@ -59,7 +62,7 @@ task_context "BufferedDataTask" do
 
     doc "In addition to the BaseTask the data are buffered. The size of the incoming "+
         "data must not change."
-    
+
     operation("setBufferSizeFromTime").
         returns("int").
         argument("delta_time", "/base/Time", "time distance between two consecutive samples").

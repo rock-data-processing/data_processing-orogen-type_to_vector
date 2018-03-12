@@ -452,6 +452,10 @@ bool BaseTask::configureHook()
 {
     if (! BaseTaskBase::configureHook())
         return false;
+
+    std::vector<std::string> typekits = _typekits.get();
+    for(uint i = 0; i < typekits.size(); i++)
+        loadTypekit(typekits[i]);
  
    std::vector<PortConfig> port_config = _port_config.get();
    for(uint i = 0; i < port_config.size(); i++)
