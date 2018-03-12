@@ -170,7 +170,7 @@ void DataVector::writeDebug() {
 
     if ( !debugOut || wroteDebug ) return;
     
-    static ConvertedVector data;
+    ConvertedVector data;
     static_cast<RTT::OutputPort<ConvertedVector>*>(debugOut)->
         write(getConvertedVector(data));
     wroteDebug = true;
@@ -292,7 +292,7 @@ void VectorBuffer::writeDebug() {
 
         if ( !debugOut ) return;
 
-        static BufferContent bc;
+        BufferContent bc;
 
         static_cast<RTT::OutputPort<BufferContent>*>(debugOut)->
             write(getBufferContent(bc));
