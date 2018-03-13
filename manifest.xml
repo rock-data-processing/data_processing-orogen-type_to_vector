@@ -1,12 +1,27 @@
 <package>
-  <description brief="Abstract task allowing dynamic adding of input ports. These ports' payload information is being merged into a vector. This representation of data is practical for machine learning algorithms.">
-  
+  <description brief="Base components to develop data-agnostic Rock tasks.">
+  The tasks in this package can be used to develop data-agnostic Rock tasks, e.g. machine learning, data filters or statistics. Typed data is converted into raw data streams and back into typed data internally. 
   </description>
   <author>Felix Rehrmann/felix.rehrmann@dfki.de</author>
+  <maintainer>Dennis Mronga/dennis.mronga@dfki.de</maintainer>
   <copyright>DFKI/robotik@dfki.de</copyright>
   <license>LGPL v2 or later</license>
   <url>http://</url>
   <logo>http://</logo>
+  <keywords>
+     <keyword>Utilities</keyword>
+     <keyword>Middleware</keyword>
+   </keywords>
+
+  <stage>-1</stage>
+  <use>multi project</use>
+  <activity>active</activity>
+
+  <classifiers>
+    <classifier>c++</classifier>
+    <classifier>rock</classifier>
+    <classifier>ubuntu</classifier>
+  </classifiers>
   
   <depend package="base/types" />
   <depend package="orogen" />
