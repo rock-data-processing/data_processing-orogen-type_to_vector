@@ -91,6 +91,10 @@ namespace type_to_vector {
 
         const DataInfo& getDataInfo(int index) const;
 
+        bool isUpdated(int vector_idx) const;
+
+        void resetIsUpdated(int vector_idx);
+
         int getDataVectorCount() const;
 
         int getDataInfoCount() const;

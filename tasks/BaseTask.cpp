@@ -328,6 +328,14 @@ const DataInfo& BaseTask::getDataInfo(int index) const {
     return mDataInfos.at(index);
 }
 
+bool BaseTask::isUpdated(int vector_idx) const {
+    return mVectors.at(vector_idx).mUpdated;
+}
+
+void BaseTask::resetIsUpdated(int vector_idx){
+    mVectors.at(vector_idx).mUpdated = false;
+}
+
 int BaseTask::getDataVectorCount() const {
     return mVectors.size();
 }
