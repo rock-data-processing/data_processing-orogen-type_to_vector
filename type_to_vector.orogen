@@ -55,8 +55,7 @@ task_context "BaseTask" do
 
 end
 
-task_context "BufferedDataTask" do
-    subclasses "BaseTask"
+task_context "BufferedDataTask", subclasses: "BaseTask" do
 
     dynamic_output_port(/^debug_buffer_\d+$/, '/type_to_vector/BufferContent')
 
