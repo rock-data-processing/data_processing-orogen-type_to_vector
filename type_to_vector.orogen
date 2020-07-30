@@ -3,6 +3,7 @@ name "type_to_vector"
 version "0.1"
 
 using_library 'type_to_vector'
+using_library "rtt_typelib-#{OroGen.orocos_target}"
 
 import_types_from 'base'
 import_types_from 'TypeToVectorTypes.hpp'
