@@ -276,6 +276,8 @@ bool BaseTask::createDataInfo(const PortConfig& config) {
 
     DataVector& dv = mVectors.at(config.vectorIdx);
 
+    using namespace boost::placeholders;
+
     aggregator::StreamAligner::Stream<SampleData>::callback_t cb = 
         boost::bind(&BaseTask::sampleCallback,this,_1,_2);
 
